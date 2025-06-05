@@ -31,5 +31,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
       - id: deploy
         uses: actions/deploy-pages@v1
