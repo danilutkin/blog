@@ -22,8 +22,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Generate static site
         run: python generate_static.py
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v1
         with:
           path: ./docs
 
@@ -31,9 +31,5 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-        with:
-          enablement: true
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
