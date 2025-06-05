@@ -1,22 +1,36 @@
-import json
 import os
+import re
+from pathlib import Path
+
+import markdown
 from flask import Flask, render_template_string, request, redirect, url_for
 
-DATA_FILE = 'posts.json'
+POSTS_DIR = Path('posts')
+POSTS_DIR.mkdir(exist_ok=True)
 
 app = Flask(__name__)
 
 
+def slugify(text: str) -> str:
+    text = text.lower()
+    text = re.sub(r"\s+", '-', text)
+    text = re.sub(r"[^a-z0-9\-а-яё]", '', text)
+    return text
+
+
 def load_posts():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return []
-
-
-def save_posts(posts):
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(posts, f, ensure_ascii=False, indent=2)
+    posts = []
+    for md_file in sorted(POSTS_DIR.glob('*.md')):
+        with md_file.open('r', encoding='utf-8') as f:
+            lines = f.read().splitlines()
+        if not lines:
+            continue
+        title_line = lines[0]
+        title = title_line.lstrip('# ').strip()
+        md_content = '\n'.join(lines)
+        html_content = markdown.markdown(md_content)
+        posts.append({'title': title, 'slug': md_file.stem, 'content': html_content})
+    return posts
 
 
 posts = load_posts()
@@ -31,7 +45,7 @@ def index():
 {% for post in posts %}
   <div>
     <h2>{{ post.title }}</h2>
-    <p>{{ post.content }}</p>
+    {{ post.content|safe }}
   </div>
 {% else %}
   <p>No posts yet.</p>
@@ -50,8 +64,12 @@ def add():
     title = request.form.get('title', '').strip()
     content = request.form.get('content', '').strip()
     if title and content:
-        posts.append({'title': title, 'content': content})
-        save_posts(posts)
+        slug = slugify(title)
+        md_file = POSTS_DIR / f"{slug}.md"
+        with md_file.open('w', encoding='utf-8') as f:
+            f.write(f"# {title}\n\n{content}\n")
+        global posts
+        posts = load_posts()
     return redirect(url_for('index'))
 
 
