@@ -23,8 +23,9 @@ jobs:
       - name: Generate static site
         run: python generate_static.py
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
+          name: github-pages
           path: ./docs
 
   deploy:
@@ -33,5 +34,7 @@ jobs:
     steps:
       - name: Setup Pages
         uses: actions/configure-pages@v3
-      - id: deploy
+      - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
+        with:
+          artifact_name: github-pages
