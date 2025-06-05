@@ -23,7 +23,7 @@ jobs:
       - name: Generate static site
         run: python generate_static.py
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: github-pages
           path: ./docs
