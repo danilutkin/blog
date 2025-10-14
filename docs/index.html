@@ -1,13 +1,38 @@
-<!doctype html>
-<html lang="ru">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Simple Blog</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>VPN Blog</title>
+    <meta name="description" content="Simple, private VPN service for Russia and abroad">
+    <link rel="stylesheet" href="style.css">
+    <link rel="alternate" type="application/rss+xml" href="rss.xml">
+    <link rel="alternate" type="application/atom+xml" href="atom.xml">
 </head>
 <body>
-<h1>Simple Blog</h1>
-<div>
-  <h2><a href="first-post.html">Первый пост</a></h2>
-</div>
+    <header>
+        <h1><a href="index.html">VPN Blog</a></h1>
+        <nav>
+            <a href="rss.xml">RSS</a> | 
+            <a href="atom.xml">Atom</a>
+        </nav>
+    </header>
+    <main>
+        <div class="posts">
+            <article class="post">
+                <h2><a href="why-privacy-matters-in-2024.html">Why Privacy Matters in 2024</a></h2>
+                <time>2024-01-20</time>
+                <div class="excerpt">In today&#x27;s digital world, privacy isn&#x27;t just about hiding secrets—it&#x27;s about protecting your fundamental rights.  Here&#x27;s why privacy matters for everyone:  - Personal freedom: You should control your ...</div>
+            </article>
+            <article class="post">
+                <h2><a href="welcome-to-vpn-blog.html">Welcome to VPN Blog</a></h2>
+                <time>2024-01-15</time>
+                <div class="excerpt">This is a simple blog about VPN services, privacy, and internet freedom.  We&#x27;re building a one-click VPN service for users in Russia and abroad. Our goal is to provide:  - Private, stable, censorship-...</div>
+            </article>
+        </div>
+    </main>
+    <footer>
+        <p>Simple, private VPN service</p>
+    </footer>
 </body>
 </html>

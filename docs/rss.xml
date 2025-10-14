@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+    <channel>
+        <title>VPN Blog</title>
+        <link>https://yourusername.github.io/your-repo</link>
+        <description>Simple, private VPN service for Russia and abroad</description>
+        <language>en</language>
+        <lastBuildDate>Tue, 14 Oct 2025 16:31:59 GMT</lastBuildDate>
+        <item>
+            <title>Why Privacy Matters in 2024</title>
+            <link>https://yourusername.github.io/your-repo/why-privacy-matters-in-2024.html</link>
+            <description>In today&#x27;s digital world, privacy isn&#x27;t just about hiding secrets—it&#x27;s about protecting your fundamental rights.
+
+Here&#x27;s why privacy matters for everyone:
+
+- Personal freedom: You should control your own data
+- Security: Private data can&#x27;t be stolen or misused
+- Democracy: Private communication enables free speech
+- Business: Companies can&#x27;t exploit your personal information
+
+For users in Russia and other countries with internet restrictions, privacy becomes even more critical. A VPN isn&#x27;t just ...</description>
+            <pubDate>Sat, 20 Jan 2024 00:00:00 GMT</pubDate>
+            <guid>https://yourusername.github.io/your-repo/why-privacy-matters-in-2024.html</guid>
+        </item>
+        <item>
+            <title>Welcome to VPN Blog</title>
+            <link>https://yourusername.github.io/your-repo/welcome-to-vpn-blog.html</link>
+            <description>This is a simple blog about VPN services, privacy, and internet freedom.
+
+We&#x27;re building a one-click VPN service for users in Russia and abroad. Our goal is to provide:
+
+- Private, stable, censorship-resistant connections
+- Easy setup for non-technical users
+- Affordable pricing at 500₽/month
+
+This blog will cover:
+- VPN setup guides
+- Privacy best practices
+- Censorship resistance techniques
+- Service updates and announcements
+
+Stay tuned for more content, and don&#x27;t forget to subscribe to our R...</description>
+            <pubDate>Mon, 15 Jan 2024 00:00:00 GMT</pubDate>
+            <guid>https://yourusername.github.io/your-repo/welcome-to-vpn-blog.html</guid>
+        </item>
+    </channel>
+</rss>

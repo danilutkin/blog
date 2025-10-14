@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>VPN Blog</title>
+    <link href="https://yourusername.github.io/your-repo" />
+    <link href="https://yourusername.github.io/your-repo/atom.xml" rel="self" />
+    <id>https://yourusername.github.io/your-repo</id>
+    <updated>2025-10-14T16:31:59Z</updated>
+    <author>
+        <name>VPN Blog</name>
+    </author>
+    <subtitle>Simple, private VPN service for Russia and abroad</subtitle>
+    <entry>
+        <title>Why Privacy Matters in 2024</title>
+        <link href="https://yourusername.github.io/your-repo/why-privacy-matters-in-2024.html" />
+        <id>https://yourusername.github.io/your-repo/why-privacy-matters-in-2024.html</id>
+        <updated>2024-01-20T00:00:00Z</updated>
+        <summary>In today&#x27;s digital world, privacy isn&#x27;t just about hiding secrets—it&#x27;s about protecting your fundamental rights.
+
+Here&#x27;s why privacy matters for everyone:
+
+- Personal freedom: You should control your </summary>
+        <content type="html">In today&#x27;s digital world, privacy isn&#x27;t just about hiding secrets—it&#x27;s about protecting your fundamental rights.
+
+Here&#x27;s why privacy matters for everyone:
+
+- Personal freedom: You should control your own data
+- Security: Private data can&#x27;t be stolen or misused
+- Democracy: Private communication enables free speech
+- Business: Companies can&#x27;t exploit your personal information
+
+For users in Russia and other countries with internet restrictions, privacy becomes even more critical. A VPN isn&#x27;t just about watching Netflix—it&#x27;s about accessing information freely and communicating without surveillance.
+
+Our VPN service is designed with these principles in mind:
+- No logs policy
+- Strong encryption
+- Simple setup
+- Reliable connections
+
+Privacy is not a luxury—it&#x27;s a necessity in the modern world.</content>
+    </entry>
+    <entry>
+        <title>Welcome to VPN Blog</title>
+        <link href="https://yourusername.github.io/your-repo/welcome-to-vpn-blog.html" />
+        <id>https://yourusername.github.io/your-repo/welcome-to-vpn-blog.html</id>
+        <updated>2024-01-15T00:00:00Z</updated>
+        <summary>This is a simple blog about VPN services, privacy, and internet freedom.
+
+We&#x27;re building a one-click VPN service for users in Russia and abroad. Our goal is to provide:
+
+- Private, stable, censorship-</summary>
+        <content type="html">This is a simple blog about VPN services, privacy, and internet freedom.
+
+We&#x27;re building a one-click VPN service for users in Russia and abroad. Our goal is to provide:
+
+- Private, stable, censorship-resistant connections
+- Easy setup for non-technical users
+- Affordable pricing at 500₽/month
+
+This blog will cover:
+- VPN setup guides
+- Privacy best practices
+- Censorship resistance techniques
+- Service updates and announcements
+
+Stay tuned for more content, and don&#x27;t forget to subscribe to our RSS feed!</content>
+    </entry>
+</feed>

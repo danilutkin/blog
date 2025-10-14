@@ -1,0 +1,17 @@
+Welcome to VPN Blog
+
+This is a simple blog about VPN services, privacy, and internet freedom.
+
+We're building a one-click VPN service for users in Russia and abroad. Our goal is to provide:
+
+- Private, stable, censorship-resistant connections
+- Easy setup for non-technical users
+- Affordable pricing at 500₽/month
+
+This blog will cover:
+- VPN setup guides
+- Privacy best practices
+- Censorship resistance techniques
+- Service updates and announcements
+
+Stay tuned for more content, and don't forget to subscribe to our RSS feed!
