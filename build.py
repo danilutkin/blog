@@ -1,314 +1,278 @@
 #!/usr/bin/env python3
-"""
-Simple static blog generator - Hacker News style
-Converts text files to static HTML with RSS feeds
-"""
+"""Static blog builder with minimal templates and per-post pages."""
 
-import os
-import re
-from datetime import datetime
+from __future__ import annotations
+
+from dataclasses import dataclass
+from datetime import date, datetime
 from pathlib import Path
+import html
+import re
+from typing import Iterable
 
-# Configuration
-POSTS_DIR = Path('posts')
-OUTPUT_DIR = Path('docs')
+POSTS_DIR = Path("posts")
+OUTPUT_DIR = Path("docs")
 SITE_TITLE = "Wanderlust & Wonder"
-SITE_URL = "https://yourusername.github.io/your-repo"  # Update this
-SITE_DESCRIPTION = "Stories from travels, discoveries, and the beautiful chaos of life"
+SITE_TAGLINE = "Tiny stories from the road"
+STYLE_NAME = "style.css"
 
-def parse_post_filename(filename):
-    """Extract date and title from filename like '2024-01-15-vpn-setup-guide.txt'"""
-    match = re.match(r'(\d{4}-\d{2}-\d{2})-(.+)\.txt$', filename)
+POST_FILENAME = re.compile(r"(?P<date>\d{4}-\d{2}-\d{2})-(?P<slug>.+)\.txt$")
+
+STYLE_CONTENT = """/* Tiny, readable defaults */
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.6;
+  margin: 0;
+}
+body {
+  background-color: #f5f5f5;
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: 2.5rem 1.5rem 4rem;
+}
+a {
+  color: inherit;
+}
+header,
+footer {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+nav a {
+  text-decoration: none;
+  font-weight: 600;
+}
+article {
+  margin-bottom: 3rem;
+}
+.post-date {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: -0.5rem;
+}
+ul {
+  padding-left: 1.2rem;
+}
+pre,
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+"""
+
+
+@dataclass
+class Post:
+    title: str
+    date: date
+    slug: str
+    body: str
+    body_html: str
+
+    @property
+    def filename(self) -> str:
+        return f"{self.slug}.html"
+
+
+def parse_post(path: Path) -> Post | None:
+    match = POST_FILENAME.match(path.name)
     if not match:
-        return None, None
-    date_str, title = match.groups()
-    try:
-        date = datetime.strptime(date_str, '%Y-%m-%d')
-        return date, title.replace('-', ' ')
-    except ValueError:
-        return None, None
+        return None
 
-def load_posts():
-    """Load all posts from posts directory"""
-    posts = []
-    
+    date_str = match.group("date")
+    slug = match.group("slug")
+
+    try:
+        date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+
+    raw = path.read_text(encoding="utf-8").strip()
+    if not raw:
+        return None
+
+    lines = raw.splitlines()
+    title = lines[0].strip() if lines else slug.replace("-", " ").title()
+    body = "\n".join(lines[1:]).strip()
+    body_html = render_body(body)
+
+    return Post(title=title, date=date, slug=slug, body=body, body_html=body_html)
+
+
+def render_body(body: str) -> str:
+    if not body:
+        return ""
+
+    blocks: list[str] = []
+    buffer: list[str] = []
+    in_list = False
+
+    def flush_paragraph() -> None:
+        nonlocal buffer
+        if buffer:
+            text = " ".join(buffer)
+            blocks.append(f"<p>{html.escape(text)}</p>")
+            buffer = []
+
+    for line in body.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            if in_list:
+                blocks.append("</ul>")
+                in_list = False
+            flush_paragraph()
+            continue
+
+        if stripped.startswith("- "):
+            flush_paragraph()
+            if not in_list:
+                blocks.append("<ul>")
+                in_list = True
+            blocks.append(f"<li>{html.escape(stripped[2:])}</li>")
+            continue
+
+        if in_list:
+            blocks.append("</ul>")
+            in_list = False
+
+        buffer.append(stripped)
+
+    if in_list:
+        blocks.append("</ul>")
+    flush_paragraph()
+
+    return "\n".join(blocks)
+
+
+def load_posts() -> list[Post]:
+    posts: list[Post] = []
     if not POSTS_DIR.exists():
-        POSTS_DIR.mkdir(exist_ok=True)
         return posts
-    
-    for txt_file in sorted(POSTS_DIR.glob('*.txt'), reverse=True):  # Newest first
-        date, title = parse_post_filename(txt_file.name)
-        if not date or not title:
-            print(f"Warning: Skipping invalid filename: {txt_file.name}")
-            continue
-            
-        with txt_file.open('r', encoding='utf-8') as f:
-            content = f.read().strip()
-        
-        if not content:
-            continue
-            
-        # Extract title from first line if it exists
-        lines = content.split('\n')
-        if lines and lines[0].strip():
-            title = lines[0].strip()
-            content = '\n'.join(lines[1:]).strip()
-        
-        # Create slug for URLs
-        slug = re.sub(r'[^a-z0-9]+', '-', title.lower()).strip('-')
-        
-        posts.append({
-            'title': title,
-            'slug': slug,
-            'content': content,
-            'date': date,
-            'filename': txt_file.name
-        })
-    
+
+    for path in sorted(POSTS_DIR.glob("*.txt")):
+        post = parse_post(path)
+        if post:
+            posts.append(post)
+
+    posts.sort(key=lambda post: post.date, reverse=True)
     return posts
 
-def html_escape(text):
-    """Escape HTML special characters"""
-    return (text.replace('&', '&amp;')
-                .replace('<', '&lt;')
-                .replace('>', '&gt;')
-                .replace('"', '&quot;')
-                .replace("'", '&#x27;'))
 
-def format_content(content):
-    """Convert plain text to HTML with basic formatting"""
-    lines = content.split('\n')
-    html_lines = []
-    
-    for line in lines:
-        line = line.strip()
-        if not line:
-            html_lines.append('<br>')
-        elif line.startswith('- '):
-            # Simple list item
-            item = html_escape(line[2:])
-            html_lines.append(f'<li>{item}</li>')
-        else:
-            # Regular paragraph
-            escaped = html_escape(line)
-            html_lines.append(f'<p>{escaped}</p>')
-    
-    return '\n'.join(html_lines)
-
-def generate_index(posts):
-    """Generate main index page"""
-    html = f'''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{SITE_TITLE}</title>
-    <meta name="description" content="{SITE_DESCRIPTION}">
-    <link rel="stylesheet" href="style.css">
-    <link rel="alternate" type="application/rss+xml" href="rss.xml">
-    <link rel="alternate" type="application/atom+xml" href="atom.xml">
-</head>
+def render_post_page(post: Post) -> str:
+    title = html.escape(post.title)
+    date_str = post.date.strftime("%B %d, %Y")
+    return f"""<!DOCTYPE html>
+<html lang=\"en\">
+<meta charset=\"utf-8\">
+<title>{title} – {html.escape(SITE_TITLE)}</title>
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+<link rel=\"stylesheet\" href=\"{STYLE_NAME}\">
 <body>
-    <header>
-        <h1><a href="index.html">{SITE_TITLE}</a></h1>
-        <nav>
-            <a href="rss.xml">RSS</a> | 
-            <a href="atom.xml">Atom</a>
-        </nav>
-    </header>
-    <main>
-'''
-    
-    if posts:
-        html += '        <div class="posts">\n'
-        for post in posts:
-            # Create excerpt (first 200 chars)
-            excerpt = post['content'][:200].replace('\n', ' ')
-            if len(post['content']) > 200:
-                excerpt += '...'
-            
-            date_str = post['date'].strftime('%Y-%m-%d')
-            html += f'''            <article class="post">
-                <h2><a href="{post['slug']}.html">{post['title']}</a></h2>
-                <time>{date_str}</time>
-                <div class="excerpt">{html_escape(excerpt)}</div>
-            </article>
-'''
-        html += '        </div>\n'
-    else:
-        html += '        <p>No posts yet. Check back soon!</p>\n'
-    
-    html += '''    </main>
-    <footer>
-        <p>Stories from the road less traveled</p>
-    </footer>
+<header>
+  <p><a href=\"index.html\">{html.escape(SITE_TITLE)}</a></p>
+  <p>{html.escape(SITE_TAGLINE)}</p>
+</header>
+<main>
+  <article>
+    <h1>{title}</h1>
+    <p class=\"post-date\">{html.escape(date_str)}</p>
+    {post.body_html}
+  </article>
+</main>
+<footer>
+  <p><a href=\"index.html\">Back to all stories</a></p>
+</footer>
 </body>
-</html>'''
-    
-    return html
+</html>
+"""
 
-def generate_post_page(post, all_posts):
-    """Generate individual post page"""
-    # Find previous/next posts
-    current_index = next(i for i, p in enumerate(all_posts) if p['slug'] == post['slug'])
-    prev_post = all_posts[current_index + 1] if current_index + 1 < len(all_posts) else None
-    next_post = all_posts[current_index - 1] if current_index > 0 else None
-    
-    html = f'''<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{post['title']} - {SITE_TITLE}</title>
-    <meta name="description" content="{html_escape(post['content'][:200])}">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header>
-        <h1><a href="index.html">{SITE_TITLE}</a></h1>
-        <nav>
-            <a href="index.html">← Back to posts</a>
-        </nav>
-    </header>
-    <main>
-        <article class="post-full">
-            <h1>{post['title']}</h1>
-            <time>{post['date'].strftime('%Y-%m-%d')}</time>
-            <div class="content">
-                {format_content(post['content'])}
-            </div>
-        </article>
-        
-        <nav class="post-nav">
-'''
-    
-    if prev_post:
-        html += f'            <a href="{prev_post["slug"]}.html" class="prev">← {prev_post["title"]}</a>\n'
-    if next_post:
-        html += f'            <a href="{next_post["slug"]}.html" class="next">{next_post["title"]} →</a>\n'
-    
-    html += '''        </nav>
-    </main>
-    <footer>
-        <p>Stories from the road less traveled</p>
-    </footer>
-</body>
-</html>'''
-    
-    return html
 
-def generate_rss(posts):
-    """Generate RSS 2.0 feed"""
-    rss = f'''<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
-    <channel>
-        <title>{SITE_TITLE}</title>
-        <link>{SITE_URL}</link>
-        <description>{SITE_DESCRIPTION}</description>
-        <language>en</language>
-        <lastBuildDate>{datetime.now().strftime('%a, %d %b %Y %H:%M:%S GMT')}</lastBuildDate>
-'''
-    
-    for post in posts[:10]:  # Latest 10 posts
-        pub_date = post['date'].strftime('%a, %d %b %Y %H:%M:%S GMT')
-        content = html_escape(post['content'][:500])
-        if len(post['content']) > 500:
-            content += '...'
-        
-        rss += f'''        <item>
-            <title>{html_escape(post['title'])}</title>
-            <link>{SITE_URL}/{post['slug']}.html</link>
-            <description>{content}</description>
-            <pubDate>{pub_date}</pubDate>
-            <guid>{SITE_URL}/{post['slug']}.html</guid>
-        </item>
-'''
-    
-    rss += '''    </channel>
-</rss>'''
-    
-    return rss
+def first_paragraph_html(body_html: str) -> str | None:
+    match = re.search(r"<p>(.*?)</p>", body_html, flags=re.DOTALL)
+    if match:
+        return match.group(0)
+    match = re.search(r"<li>(.*?)</li>", body_html, flags=re.DOTALL)
+    if match:
+        return f"<p>{match.group(1)}</p>"
+    return None
 
-def generate_atom(posts):
-    """Generate Atom 1.0 feed"""
-    atom = f'''<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <title>{SITE_TITLE}</title>
-    <link href="{SITE_URL}" />
-    <link href="{SITE_URL}/atom.xml" rel="self" />
-    <id>{SITE_URL}</id>
-    <updated>{datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')}</updated>
-    <author>
-        <name>{SITE_TITLE}</name>
-    </author>
-    <subtitle>{SITE_DESCRIPTION}</subtitle>
-'''
-    
-    for post in posts[:10]:  # Latest 10 posts
-        updated = post['date'].strftime('%Y-%m-%dT%H:%M:%SZ')
-        content = html_escape(post['content'])
-        
-        atom += f'''    <entry>
-        <title>{html_escape(post['title'])}</title>
-        <link href="{SITE_URL}/{post['slug']}.html" />
-        <id>{SITE_URL}/{post['slug']}.html</id>
-        <updated>{updated}</updated>
-        <summary>{html_escape(post['content'][:200])}</summary>
-        <content type="html">{content}</content>
-    </entry>
-'''
-    
-    atom += '</feed>'
-    
-    return atom
 
-def main():
-    """Main generation function"""
-    print("Building static blog...")
-    
-    # Ensure output directory exists
-    OUTPUT_DIR.mkdir(exist_ok=True)
-    
-    # Copy CSS file
-    import shutil
-    if Path('style.css').exists():
-        shutil.copy2('style.css', OUTPUT_DIR / 'style.css')
-        print("Copied style.css")
-    
-    # Load posts
-    posts = load_posts()
-    print(f"Found {len(posts)} posts")
-    
-    if not posts:
-        print("No posts found. Create some .txt files in the posts/ directory.")
-        return
-    
-    # Generate index page
-    index_html = generate_index(posts)
-    with (OUTPUT_DIR / 'index.html').open('w', encoding='utf-8') as f:
-        f.write(index_html)
-    print("Generated index.html")
-    
-    # Generate individual post pages
+def render_index(posts: Iterable[Post]) -> str:
+    items: list[str] = []
     for post in posts:
-        post_html = generate_post_page(post, posts)
-        with (OUTPUT_DIR / f"{post['slug']}.html").open('w', encoding='utf-8') as f:
-            f.write(post_html)
-    print(f"Generated {len(posts)} post pages")
-    
-    # Generate RSS feed
-    rss_xml = generate_rss(posts)
-    with (OUTPUT_DIR / 'rss.xml').open('w', encoding='utf-8') as f:
-        f.write(rss_xml)
-    print("Generated rss.xml")
-    
-    # Generate Atom feed
-    atom_xml = generate_atom(posts)
-    with (OUTPUT_DIR / 'atom.xml').open('w', encoding='utf-8') as f:
-        f.write(atom_xml)
-    print("Generated atom.xml")
-    
-    print("Build complete!")
+        title = html.escape(post.title)
+        date_str = html.escape(post.date.strftime("%B %d, %Y"))
+        summary = first_paragraph_html(post.body_html) or ""
+        summary_html = summary if summary else ""
+        items.append(
+            """
+    <article>
+      <h2><a href=\"{slug}.html\">{title}</a></h2>
+      <p class=\"post-date\">{date}</p>
+      {summary}
+    </article>
+            """.strip().format(slug=post.slug, title=title, date=date_str, summary=summary_html)
+        )
 
-if __name__ == '__main__':
-    main()
+    posts_html = "\n".join(items) if items else "<p>No stories yet. Add a text file to posts/.</p>"
+
+    return f"""<!DOCTYPE html>
+<html lang=\"en\">
+<meta charset=\"utf-8\">
+<title>{html.escape(SITE_TITLE)}</title>
+<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
+<link rel=\"stylesheet\" href=\"{STYLE_NAME}\">
+<body>
+<header>
+  <h1>{html.escape(SITE_TITLE)}</h1>
+  <p>{html.escape(SITE_TAGLINE)}</p>
+</header>
+<main>
+{posts_html}
+</main>
+<footer>
+  <p>Built with plain text files and a small Python script.</p>
+</footer>
+</body>
+</html>
+"""
+
+
+def write_file(path: Path, content: str) -> None:
+    path.write_text(content, encoding="utf-8")
+
+
+def clean_output_dir(keep: set[str]) -> None:
+    for path in OUTPUT_DIR.glob("**/*"):
+        if path.is_dir():
+            continue
+        rel = path.relative_to(OUTPUT_DIR).as_posix()
+        if rel not in keep:
+            path.unlink()
+    # remove empty directories
+    for path in sorted(OUTPUT_DIR.glob("**/*"), reverse=True):
+        if path.is_dir() and not any(path.iterdir()):
+            path.rmdir()
+
+
+def build() -> None:
+    OUTPUT_DIR.mkdir(exist_ok=True)
+
+    posts = load_posts()
+
+    keep_files = {"index.html", STYLE_NAME}
+
+    write_file(OUTPUT_DIR / STYLE_NAME, STYLE_CONTENT.strip() + "\n")
+    write_file(OUTPUT_DIR / "index.html", render_index(posts))
+
+    for post in posts:
+        keep_files.add(post.filename)
+        write_file(OUTPUT_DIR / post.filename, render_post_page(post))
+
+    clean_output_dir(keep_files)
+
+    print(f"Generated {len(posts)} post page(s) and index.html")
+
+
+if __name__ == "__main__":
+    build()

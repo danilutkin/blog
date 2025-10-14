@@ -1,86 +1,35 @@
 # Wanderlust & Wonder
 
-A minimal, Hacker News-style personal blog about travels, discoveries, and life's beautiful moments. Generates static HTML with RSS feeds.
+This repository holds a minimal static blog: plain text posts plus one small Python script that renders an index page, per-post pages, and a shared stylesheet.
 
-## Features
+## How it works
 
-- **Zero dependencies** - Just Python 3 standard library
-- **Static generation** - Fast loading, works everywhere
-- **RSS & Atom feeds** - Automatic feed generation
-- **Mobile responsive** - Clean, readable design
-- **GitHub Pages ready** - Automatic deployment
-- **Personal storytelling** - Perfect for travel and lifestyle content
+- Write stories as text files in `posts/`.
+- Run `python3 build.py`.
+- Open `docs/index.html` (the home page) or push to GitHub Pages.
 
-## Usage
+The build step rewrites only three things: the home page, one HTML file per post, and `docs/style.css`.
+Anything else left in `docs/` gets cleaned up automatically so the folder always mirrors the posts that exist.
 
-### Adding Posts
+## Writing a post
 
-1. Create a new file in `posts/` directory:
+1. Create a new file whose name starts with the date:
    ```
-   posts/2024-01-25-your-post-title.txt
+   posts/2024-02-01-new-adventure.txt
    ```
+2. Put the title on the first line, followed by a blank line and the story.
+3. Lists work with `- ` at the beginning of a line.
+4. Run `python3 build.py` to refresh the HTML files in `docs/`.
 
-2. Write your content in plain text:
-   ```
-   Weekend in Prague
+To delete a story, remove its file and rebuild.
 
-   Just got back from an incredible weekend in Prague...
-
-   - Visited the old town square
-   - Found this amazing café near the castle
-   - The architecture was breathtaking
-   ```
-
-3. Generate the site:
-   ```bash
-   python3 build.py
-   ```
-
-4. Commit and push to deploy
-
-### File Naming
-
-Posts must follow this format:
-```
-YYYY-MM-DD-title-with-dashes.txt
-```
-
-Example: `2024-01-25-vpn-setup-guide.txt`
-
-### Content Format
-
-- First line: Post title
-- Rest: Content in plain text
-- Lists: Use `- ` for bullet points
-- No special syntax needed
-
-## Deployment
-
-### GitHub Pages
-
-1. Push the repository to GitHub (for example as `<username>/blog`).
-2. In the repository settings, enable **GitHub Pages** with the `docs/` folder as the source.
-3. Your site will be available at:
-
-   ```
-   https://<username>.github.io/blog/
-   ```
-
-   Replace `<username>` with your GitHub account name. Once the first publish finishes, you can share that URL as the public link to the blog.
-
-## Local Development
+## Local preview
 
 ```bash
-# Generate static site
 python3 build.py
-
-# View in browser
-open docs/index.html
+open docs/index.html  # or use any browser
 ```
 
-## RSS Feeds
+## Deploying to GitHub Pages
 
-- RSS 2.0: `/rss.xml`
-- Atom 1.0: `/atom.xml`
-
-Both feeds are automatically generated and include the latest 10 posts.
+Set the repository's Pages source to the `docs/` folder. Each time you rebuild and push, the index and post pages update automatically.
