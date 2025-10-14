@@ -56,7 +56,17 @@ Example: `2024-01-25-vpn-setup-guide.txt`
 
 ## Deployment
 
-The blog automatically deploys to GitHub Pages when you push to the `main` branch.
+### GitHub Pages
+
+1. Push the repository to GitHub (for example as `<username>/blog`).
+2. In the repository settings, enable **GitHub Pages** with the `docs/` folder as the source.
+3. Your site will be available at:
+
+   ```
+   https://<username>.github.io/blog/
+   ```
+
+   Replace `<username>` with your GitHub account name. Once the first publish finishes, you can share that URL as the public link to the blog.
 
 ## Local Development
 
