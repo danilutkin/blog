@@ -12,9 +12,9 @@ from pathlib import Path
 # Configuration
 POSTS_DIR = Path('posts')
 OUTPUT_DIR = Path('docs')
-SITE_TITLE = "VPN Blog"
+SITE_TITLE = "Wanderlust & Wonder"
 SITE_URL = "https://yourusername.github.io/your-repo"  # Update this
-SITE_DESCRIPTION = "Simple, private VPN service for Russia and abroad"
+SITE_DESCRIPTION = "Stories from travels, discoveries, and the beautiful chaos of life"
 
 def parse_post_filename(filename):
     """Extract date and title from filename like '2024-01-15-vpn-setup-guide.txt'"""
@@ -140,7 +140,7 @@ def generate_index(posts):
     
     html += '''    </main>
     <footer>
-        <p>Simple, private VPN service</p>
+        <p>Stories from the road less traveled</p>
     </footer>
 </body>
 </html>'''
@@ -190,7 +190,7 @@ def generate_post_page(post, all_posts):
     html += '''        </nav>
     </main>
     <footer>
-        <p>Simple, private VPN service</p>
+        <p>Stories from the road less traveled</p>
     </footer>
 </body>
 </html>'''

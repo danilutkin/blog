@@ -1,6 +1,6 @@
-# Simple VPN Blog
+# Wanderlust & Wonder
 
-A minimal, Hacker News-style blog for VPN service content. Generates static HTML with RSS feeds.
+A minimal, Hacker News-style personal blog about travels, discoveries, and life's beautiful moments. Generates static HTML with RSS feeds.
 
 ## Features
 
@@ -9,6 +9,7 @@ A minimal, Hacker News-style blog for VPN service content. Generates static HTML
 - **RSS & Atom feeds** - Automatic feed generation
 - **Mobile responsive** - Clean, readable design
 - **GitHub Pages ready** - Automatic deployment
+- **Personal storytelling** - Perfect for travel and lifestyle content
 
 ## Usage
 
@@ -21,12 +22,13 @@ A minimal, Hacker News-style blog for VPN service content. Generates static HTML
 
 2. Write your content in plain text:
    ```
-   Your Post Title
+   Weekend in Prague
 
-   Your content here...
+   Just got back from an incredible weekend in Prague...
 
-   - Bullet points work
-   - Just use dashes
+   - Visited the old town square
+   - Found this amazing café near the castle
+   - The architecture was breathtaking
    ```
 
 3. Generate the site:
