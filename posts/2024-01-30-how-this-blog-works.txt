@@ -1,0 +1,9 @@
+How This Blog Works
+
+This site is deliberately tiny. Every story lives as a text file inside the `posts/` folder, and `python3 build.py` glues them together into one HTML page at `docs/index.html`.
+
+To add something new, drop another text file in `posts/` using the pattern `YYYY-MM-DD-short-title.txt`. Keep the title on the first line, leave a blank line, and then write the story in plain paragraphs or bullets that start with `- `. Run `python3 build.py` to rebuild the page.
+
+Need to remove a story? Delete its text file and rebuild. The single page is recreated from scratch each time, so it will only show the files that still exist.
+
+No templates, no feeds, and no extra assets—just text files in, one page out.
