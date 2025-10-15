@@ -16,7 +16,9 @@ SITE_TITLE = "Wanderlust & Wonder"
 SITE_TAGLINE = "Tiny stories from the road"
 STYLE_NAME = "style.css"
 
-POST_FILENAME = re.compile(r"(?P<date>\d{4}-\d{2}-\d{2})-(?P<slug>.+)\.txt$")
+POST_FILENAME = re.compile(
+    r"(?P<date>\d{4}-\d{2}-\d{2})-(?P<slug>.+)\.(?P<ext>txt|md)$"
+)
 
 STYLE_CONTENT = """/* Tiny, readable defaults */
 :root {
@@ -81,19 +83,36 @@ def parse_post(path: Path) -> Post | None:
 
     date_str = match.group("date")
     slug = match.group("slug")
+    ext = match.group("ext")
 
     try:
         date = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         return None
 
-    raw = path.read_text(encoding="utf-8").strip()
-    if not raw:
+    raw = path.read_text(encoding="utf-8")
+    if not raw.strip():
         return None
 
     lines = raw.splitlines()
-    title = lines[0].strip() if lines else slug.replace("-", " ").title()
-    body = "\n".join(lines[1:]).strip()
+    title_line = ""
+    body_start = 0
+    for idx, line in enumerate(lines):
+        if line.strip():
+            title_line = line.strip()
+            body_start = idx + 1
+            break
+
+    if not title_line:
+        return None
+
+    if ext == "md":
+        heading_match = re.match(r"^#+\s*(.*)$", title_line)
+        if heading_match and heading_match.group(1).strip():
+            title_line = heading_match.group(1).strip()
+
+    title = title_line or slug.replace("-", " ").title()
+    body = "\n".join(lines[body_start:]).strip()
     body_html = render_body(body)
 
     return Post(title=title, date=date, slug=slug, body=body, body_html=body_html)
