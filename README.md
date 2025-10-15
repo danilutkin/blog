@@ -4,7 +4,7 @@ This repository holds a minimal static blog: plain text posts plus one small Pyt
 
 ## How it works
 
-- Write stories as text files in `posts/`.
+- Write stories as plain text or Markdown files in `posts/` (use the `.txt` or `.md` extension).
 - Run `python3 build.py`.
 - Open `docs/index.html` (the home page) or push to GitHub Pages.
 
@@ -16,9 +16,12 @@ Anything else left in `docs/` gets cleaned up automatically so the folder always
 1. Create a new file whose name starts with the date:
    ```
    posts/2024-02-01-new-adventure.txt
+   posts/2024-02-01-new-adventure.md
    ```
-2. Put the title on the first line, followed by a blank line and the story.
-3. Lists work with `- ` at the beginning of a line.
+2. Put the title on the first non-empty line. If you're writing Markdown, you can optionally start with `# Title` and the build
+   script will reuse the heading text.
+3. The builder understands common Markdown touches like headings, inline code, emphasis, and lists (using `- ` or numbered
+   lines).
 4. Run `python3 build.py` to refresh the HTML files in `docs/`.
 
 To delete a story, remove its file and rebuild.
