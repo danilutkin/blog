@@ -1,24 +1,30 @@
 /* Tiny, readable defaults */
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.6;
   margin: 0;
+  --hn-bg: #1b1b1b;
+  --hn-surface: #242424;
+  --hn-text: #f6f6ef;
+  --hn-muted: #9d9d9d;
+  --hn-accent: #ff6600;
+  --hn-accent-hover: #ffa366;
 }
 body {
-  background-color: #f5f5f5;
-  color: #1f2933;
+  background-color: var(--hn-bg);
+  color: var(--hn-text);
   margin: 0 auto;
   max-width: 48rem;
   padding: 2.5rem 1.5rem 4rem;
 }
 a {
-  color: #0b57d0;
+  color: var(--hn-accent);
 }
 
 a:hover,
 a:focus {
-  color: #0842a0;
+  color: var(--hn-accent-hover);
 }
 header,
 footer {
@@ -33,7 +39,7 @@ article {
   margin-bottom: 3rem;
 }
 .post-date {
-  color: #666;
+  color: var(--hn-muted);
   font-size: 0.9rem;
   margin-top: -0.5rem;
 }
@@ -43,4 +49,7 @@ ul {
 pre,
 code {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  background-color: var(--hn-surface);
+  border-radius: 4px;
+  padding: 0.25rem 0.4rem;
 }
