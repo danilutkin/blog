@@ -1,15 +1,15 @@
 /* Tiny, readable defaults */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.6;
   margin: 0;
-  --hn-bg: #1b1b1b;
-  --hn-surface: #242424;
-  --hn-text: #f6f6ef;
-  --hn-muted: #9d9d9d;
+  --hn-bg: #ffffff;
+  --hn-surface: #f3f4f6;
+  --hn-text: #0f172a;
+  --hn-muted: #475569;
   --hn-accent: #ff6600;
-  --hn-accent-hover: #ffa366;
+  --hn-accent-hover: #cc5200;
 }
 body {
   background-color: var(--hn-bg);
@@ -17,6 +17,18 @@ body {
   margin: 0 auto;
   max-width: 48rem;
   padding: 2.5rem 1.5rem 4rem;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+li {
+  color: var(--hn-text);
 }
 a {
   color: var(--hn-accent);
