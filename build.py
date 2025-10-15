@@ -99,49 +99,184 @@ def parse_post(path: Path) -> Post | None:
     return Post(title=title, date=date, slug=slug, body=body, body_html=body_html)
 
 
+AUTOLINK_RE = re.compile(r"(?P<url>[a-z][a-z0-9+.-]*://[^\s<]+)", flags=re.IGNORECASE)
+
+
 def render_body(body: str) -> str:
     if not body:
         return ""
 
     blocks: list[str] = []
-    buffer: list[str] = []
-    in_list = False
+    paragraph_lines: list[str] = []
+    list_items: list[list[str]] = []
+    list_type: str | None = None
+    in_code_fence = False
+    code_lines: list[str] = []
 
     def flush_paragraph() -> None:
-        nonlocal buffer
-        if buffer:
-            text = " ".join(buffer)
-            blocks.append(f"<p>{html.escape(text)}</p>")
-            buffer = []
+        nonlocal paragraph_lines
+        if paragraph_lines:
+            text = " ".join(paragraph_lines)
+            blocks.append(f"<p>{render_inlines(text)}</p>")
+            paragraph_lines = []
 
-    for line in body.splitlines():
+    def flush_list() -> None:
+        nonlocal list_items, list_type
+        if list_type and list_items:
+            tag = "ul" if list_type == "unordered" else "ol"
+            items_html = "".join(
+                f"<li>{' '.join(parts)}</li>" for parts in list_items
+            )
+            blocks.append(f"<{tag}>" + items_html + f"</{tag}>")
+        list_items = []
+        list_type = None
+
+    def flush_code() -> None:
+        nonlocal code_lines
+        if code_lines:
+            code_html = "\n".join(html.escape(line) for line in code_lines)
+            blocks.append(f"<pre><code>{code_html}</code></pre>")
+            code_lines = []
+
+    for raw_line in body.splitlines():
+        line = raw_line.rstrip("\n")
+
+        if in_code_fence:
+            if line.strip().startswith("```"):
+                in_code_fence = False
+                flush_code()
+            else:
+                code_lines.append(line)
+            continue
+
         stripped = line.strip()
+
+        if stripped.startswith("```"):
+            flush_paragraph()
+            flush_list()
+            in_code_fence = True
+            code_lines = []
+            continue
+
         if not stripped:
-            if in_list:
-                blocks.append("</ul>")
-                in_list = False
             flush_paragraph()
             continue
 
-        if stripped.startswith("- "):
+        bullet_match = re.match(r"^([-*+])\s+(.*)$", stripped)
+        ordered_match = re.match(r"^(\d+)[.)]\s+(.*)$", stripped)
+
+        if bullet_match:
             flush_paragraph()
-            if not in_list:
-                blocks.append("<ul>")
-                in_list = True
-            blocks.append(f"<li>{html.escape(stripped[2:])}</li>")
+            if list_type not in (None, "unordered"):
+                flush_list()
+            list_type = "unordered"
+            list_items.append([render_inlines(bullet_match.group(2))])
             continue
 
-        if in_list:
-            blocks.append("</ul>")
-            in_list = False
+        if ordered_match:
+            flush_paragraph()
+            if list_type not in (None, "ordered"):
+                flush_list()
+            list_type = "ordered"
+            list_items.append([render_inlines(ordered_match.group(2))])
+            continue
 
-        buffer.append(stripped)
+        if list_type and raw_line.startswith(" ") and list_items:
+            list_items[-1].append(render_inlines(stripped))
+            continue
 
-    if in_list:
-        blocks.append("</ul>")
+        heading_match = re.match(r"^(#{1,6})\s+(.*)$", stripped)
+        if heading_match:
+            flush_paragraph()
+            flush_list()
+            level = len(heading_match.group(1))
+            content = heading_match.group(2).strip()
+            blocks.append(f"<h{level}>{render_inlines(content)}</h{level}>")
+            continue
+
+        if list_type:
+            flush_list()
+        paragraph_lines.append(stripped)
+
+    if in_code_fence:
+        # Unclosed fence: treat captured lines as literal code.
+        in_code_fence = False
+        flush_code()
+
     flush_paragraph()
+    flush_list()
 
     return "\n".join(blocks)
+
+
+def linkify(text: str) -> str:
+    def repl(match: re.Match[str]) -> str:
+        url = match.group("url")
+        escaped = html.escape(url)
+        href = html.escape(url, quote=True)
+        return f"<a href=\"{href}\">{escaped}</a>"
+
+    return AUTOLINK_RE.sub(repl, text)
+
+
+def render_inlines(text: str) -> str:
+    segments: list[str] = []
+    i = 0
+    length = len(text)
+    plain_buffer: list[str] = []
+
+    def flush_plain() -> None:
+        if plain_buffer:
+            combined = "".join(plain_buffer)
+            escaped = linkify(html.escape(combined))
+            segments.append(escaped)
+            plain_buffer.clear()
+
+    while i < length:
+        if text.startswith("**", i):
+            end = text.find("**", i + 2)
+            if end != -1:
+                flush_plain()
+                content = text[i + 2 : end]
+                segments.append(f"<strong>{render_inlines(content)}</strong>")
+                i = end + 2
+                continue
+        if text.startswith("*", i):
+            end = text.find("*", i + 1)
+            if end != -1:
+                flush_plain()
+                content = text[i + 1 : end]
+                segments.append(f"<em>{render_inlines(content)}</em>")
+                i = end + 1
+                continue
+        if text.startswith("`", i):
+            end = text.find("`", i + 1)
+            if end != -1:
+                flush_plain()
+                code_content = text[i + 1 : end]
+                segments.append(f"<code>{html.escape(code_content)}</code>")
+                i = end + 1
+                continue
+        if text.startswith("[", i):
+            close_bracket = text.find("]", i + 1)
+            if close_bracket != -1 and close_bracket + 1 < length and text[close_bracket + 1] == "(":
+                close_paren = text.find(")", close_bracket + 2)
+                if close_paren != -1:
+                    flush_plain()
+                    label = text[i + 1 : close_bracket]
+                    url = text[close_bracket + 2 : close_paren]
+                    segments.append(
+                        f"<a href=\"{html.escape(url, quote=True)}\">{render_inlines(label)}</a>"
+                    )
+                    i = close_paren + 1
+                    continue
+
+        plain_buffer.append(text[i])
+        i += 1
+
+    flush_plain()
+
+    return "".join(segments)
 
 
 def load_posts() -> list[Post]:

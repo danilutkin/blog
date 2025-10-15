@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Understanding iOS Deep Links for VLESS Imports – Wanderlust &amp; Wonder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+<body>
+<header>
+  <p><a href="index.html">Wanderlust &amp; Wonder</a></p>
+  <p>Tiny stories from the road</p>
+</header>
+<main>
+  <article>
+    <h1>Understanding iOS Deep Links for VLESS Imports</h1>
+    <p class="post-date">February 28, 2024</p>
+    <p>Deep links let iOS hand off URLs directly to apps that have registered specific schemes. When the user taps a link with the <code>streisand://</code> or <code>v2box://</code> scheme, the operating system looks for a matching app identifier and, if present, launches the app while passing everything after the scheme as parameters.</p>
+<p>Both Streisand and V2box register custom URL schemes to streamline importing proxy configurations. The apps expect a JSON or base64 payload that matches the VLESS format, so it is common to wrap the configuration in a single URL-encoded parameter. Below are two example deep links that target each app and deliver the same VLESS configuration:</p>
+<ol><li>Streisand deep link: <a href="streisand://import?config=%7B%22v%22%3A%222%22%2C%22ps%22%3A%22Example%20VLESS%22%2C%22add%22%3A%22example.com%22%2C%22port%22%3A443%2C%22id%22%3A%22d3d94468-2e02-4a02-b1f5-8da3eb3b0123%22%2C%22aid%22%3A0%2C%22scy%22%3A%22auto%22%2C%22net%22%3A%22ws%22%2C%22type%22%3A%22none%22%2C%22host%22%3A%22cdn.example.com%22%2C%22path%22%3A%22%2Fvless%22%2C%22tls%22%3A%22tls%22%7D">streisand://import?config=%7B%22v%22%3A%222%22%2C%22ps%22%3A%22Example%20VLESS%22%2C%22add%22%3A%22example.com%22%2C%22port%22%3A443%2C%22id%22%3A%22d3d94468-2e02-4a02-b1f5-8da3eb3b0123%22%2C%22aid%22%3A0%2C%22scy%22%3A%22auto%22%2C%22net%22%3A%22ws%22%2C%22type%22%3A%22none%22%2C%22host%22%3A%22cdn.example.com%22%2C%22path%22%3A%22%2Fvless%22%2C%22tls%22%3A%22tls%22%7D</a></li><li>V2box deep link: <a href="v2box://import?config=%7B%22v%22%3A%222%22%2C%22ps%22%3A%22Example%20VLESS%22%2C%22add%22%3A%22example.com%22%2C%22port%22%3A443%2C%22id%22%3A%22d3d94468-2e02-4a02-b1f5-8da3eb3b0123%22%2C%22aid%22%3A0%2C%22scy%22%3A%22auto%22%2C%22net%22%3A%22ws%22%2C%22type%22%3A%22none%22%2C%22host%22%3A%22cdn.example.com%22%2C%22path%22%3A%22%2Fvless%22%2C%22tls%22%3A%22tls%22%7D">v2box://import?config=%7B%22v%22%3A%222%22%2C%22ps%22%3A%22Example%20VLESS%22%2C%22add%22%3A%22example.com%22%2C%22port%22%3A443%2C%22id%22%3A%22d3d94468-2e02-4a02-b1f5-8da3eb3b0123%22%2C%22aid%22%3A0%2C%22scy%22%3A%22auto%22%2C%22net%22%3A%22ws%22%2C%22type%22%3A%22none%22%2C%22host%22%3A%22cdn.example.com%22%2C%22path%22%3A%22%2Fvless%22%2C%22tls%22%3A%22tls%22%7D</a></li></ol>
+<p>In both cases the <code>config</code> parameter contains a URL-encoded JSON document. Decoded, it looks like this:</p>
+<p>{ &quot;v&quot;: &quot;2&quot;, &quot;ps&quot;: &quot;Example VLESS&quot;, &quot;add&quot;: &quot;example.com&quot;, &quot;port&quot;: 443, &quot;id&quot;: &quot;d3d94468-2e02-4a02-b1f5-8da3eb3b0123&quot;, &quot;aid&quot;: 0, &quot;scy&quot;: &quot;auto&quot;, &quot;net&quot;: &quot;ws&quot;, &quot;type&quot;: &quot;none&quot;, &quot;host&quot;: &quot;cdn.example.com&quot;, &quot;path&quot;: &quot;/vless&quot;, &quot;tls&quot;: &quot;tls&quot; }</p>
+<p>Because iOS treats deep links as normal URLs, they can be shared via Messages, Notes, or QR codes. When the Streisand or V2box apps are installed, tapping these links immediately opens the app, parses the payload, and adds the VLESS server to the user’s list. If the app is not installed, iOS instead prompts the user to download it from the App Store.</p>
+<p>For a smoother experience, ensure the deep link is percent-encoded, keep the JSON payload concise, and test the link on a device with the target app installed. That way users can reliably import the VLESS configuration with a single tap, regardless of which client they prefer.</p>
+  </article>
+</main>
+<footer>
+  <p><a href="index.html">Back to all stories</a></p>
+</footer>
+</body>
+</html>
