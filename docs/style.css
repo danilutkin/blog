@@ -1,47 +1,60 @@
-/* Tiny, readable defaults */
+/* Tiny, readable defaults with modern touches */
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.6;
   margin: 0;
-  --hn-bg: #ffffff;
-  --hn-surface: #f4f4f5;
-  --hn-text: #1e1e1e;
-  --hn-muted: #6b7280;
-  --hn-accent: #ff6600;
-  --hn-accent-hover: #cc5200;
+  --surface: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+  --surface-border: color-mix(in srgb, CanvasText 20%, transparent);
+  --card-radius: 1.1rem;
 }
 body {
-  background-color: var(--hn-bg);
-  color: var(--hn-text);
+  background: color-mix(in srgb, Canvas 98%, CanvasText 3%);
   margin: 0 auto;
-  max-width: 48rem;
+  max-width: 52rem;
   padding: 2.5rem 1.5rem 4rem;
 }
 a {
-  color: var(--hn-accent);
-}
-
-a:hover,
-a:focus {
-  color: var(--hn-accent-hover);
+  color: inherit;
 }
 header,
 footer {
   text-align: center;
   margin-bottom: 2.5rem;
 }
-nav a {
-  text-decoration: none;
-  font-weight: 600;
+main.feed {
+  display: grid;
+  gap: 2rem;
 }
-article {
-  margin-bottom: 3rem;
+.post-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--card-radius);
+  box-shadow: 0 1rem 2rem -1.5rem color-mix(in srgb, CanvasText 40%, transparent);
+  padding: 1.75rem;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.post-card:hover,
+.post-card:focus-within {
+  transform: translateY(-4px);
+  box-shadow: 0 1.35rem 2.75rem -1.5rem color-mix(in srgb, CanvasText 45%, transparent);
+}
+.post-card h2 {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.7rem);
+}
+.post-card > .post-date {
+  color: color-mix(in srgb, CanvasText 55%, transparent);
+  font-size: 0.9rem;
+  margin: 0;
+}
+.post-card > p {
+  margin-top: 0.9rem;
 }
 .post-date {
-  color: var(--hn-muted);
+  color: color-mix(in srgb, CanvasText 55%, transparent);
   font-size: 0.9rem;
-  margin-top: -0.5rem;
+  margin-top: -0.25rem;
 }
 ul {
   padding-left: 1.2rem;
@@ -49,7 +62,54 @@ ul {
 pre,
 code {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-  background-color: var(--hn-surface);
-  border-radius: 4px;
-  padding: 0.25rem 0.4rem;
+}
+.glossary-term {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.4rem;
+}
+.glossary-trigger {
+  background: none;
+  border: 0;
+  border-bottom: 1px dashed currentColor;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+}
+.glossary-trigger:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+.glossary-popover {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 1.75rem 3rem -2rem color-mix(in srgb, CanvasText 40%, transparent);
+  margin: 0;
+  max-width: min(24rem, 80vw);
+  padding: 1rem 1.25rem;
+}
+.glossary-popover:popover-open {
+  animation: popover-in 120ms ease;
+}
+.glossary-popover strong {
+  display: block;
+  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
+}
+.glossary-definition {
+  display: block;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+@keyframes popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

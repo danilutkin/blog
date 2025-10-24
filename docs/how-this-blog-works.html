@@ -4,7 +4,7 @@
 <title>How This Blog Works – Wanderlust &amp; Wonder</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<body>
+<body class="post">
 <header>
   <p><a href="index.html">Wanderlust &amp; Wonder</a></p>
   <p>Tiny stories from the road</p>
@@ -12,9 +12,9 @@
 <main>
   <article>
     <h1>How This Blog Works</h1>
-    <p class="post-date">January 30, 2024</p>
-    <p>This site is deliberately tiny. Every story lives as a text file inside the <code>posts/</code> folder, and <code>python3 build.py</code> glues them together into one HTML page at <code>docs/index.html</code>.</p>
-<p>To add something new, drop another text file in <code>posts/</code> using the pattern <code>YYYY-MM-DD-short-title.txt</code>. Keep the title on the first line, leave a blank line, and then write the story in plain paragraphs or bullets that start with <code>- </code>. Run <code>python3 build.py</code> to rebuild the page.</p>
+    <p class="post-date"><time datetime="2024-01-30">January 30, 2024</time></p>
+    <p>This site is deliberately tiny—a <span class="glossary-term"><button type="button" class="glossary-trigger" popovertarget="glossary-popover-1">static site</button><aside id="glossary-popover-1" class="glossary-popover" popover="auto" role="note"><strong>static site</strong><span class="glossary-definition">A collection of pages that are prebuilt ahead of time and can be served as-is from any web host.</span></aside></span> Every story lives as a text file inside the <code>posts/</code> folder, and <code>python3 build.py</code> glues them together into one HTML page at <code>docs/index.html</code>.</p>
+<p>To add something new, drop another text file in <code>posts/</code> using the pattern <code>YYYY-MM-DD-short-title.txt</code>. Keep the title on the first line, leave a blank line, and then write the story in plain paragraphs or bullets that start with <code>- </code>. Run <code>python3 build.py</code> to rebuild the page with a fresh <span class="glossary-term"><button type="button" class="glossary-trigger" popovertarget="glossary-popover-2">build step</button><aside id="glossary-popover-2" class="glossary-popover" popover="auto" role="note"><strong>build step</strong><span class="glossary-definition">A single command that regenerates every page from the source files so nothing can fall out of sync.</span></aside></span>.</p>
 <p>Need to remove a story? Delete its text file and rebuild. The single page is recreated from scratch each time, so it will only show the files that still exist.</p>
 <p>No templates, no feeds, and no extra assets—just text files in, one page out.</p>
   </article>
@@ -22,5 +22,34 @@
 <footer>
   <p><a href="index.html">Back to all stories</a></p>
 </footer>
+<script type="speculationrules">
+{
+  "prefetch": [
+    {
+      "source": "list",
+      "urls": [
+        "index.html",
+        "ios-deep-links-for-vless.html",
+        "researching-el-norte-de-espana.html",
+        "interesting-meeting-in-cement-museum.html",
+        "great-weekend-in-almaty.html"
+      ]
+    }
+  ],
+  "prerender": [
+    {
+      "source": "list",
+      "urls": [
+        "index.html",
+        "ios-deep-links-for-vless.html",
+        "researching-el-norte-de-espana.html",
+        "interesting-meeting-in-cement-museum.html",
+        "great-weekend-in-almaty.html"
+      ],
+      "eagerness": "moderate"
+    }
+  ]
+}
+</script>
 </body>
 </html>
