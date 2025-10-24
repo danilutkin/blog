@@ -1,58 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
-<meta charset="utf-8">
-<title>Researching El Norte de España – Wanderlust &amp; Wonder</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<body class="post">
-<header>
-  <p><a href="index.html">Wanderlust &amp; Wonder</a></p>
-  <p>Tiny stories from the road</p>
-</header>
-<main>
-  <article>
-    <h1>Researching El Norte de España</h1>
-    <p class="post-date"><time datetime="2024-01-25">January 25, 2024</time></p>
-    <p>There&#x27;s something about northern Spain that calls to me. Maybe it&#x27;s the rugged coastline, the ancient Celtic heritage, or the way the mountains meet the sea. I&#x27;ve been researching the region for months now, and each discovery makes me more eager to visit.</p>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <title>Researching El Norte de España · Wanderlust &amp; Wonder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="There&#x27;s something about northern Spain that calls to me. Maybe it&#x27;s the rugged coastline, the ancient Celtic heritage, or the way the mountains meet the…">
+  <meta name="color-scheme" content="light dark">
+  
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+          },
+          colors: {
+            brand: {
+              light: '#f5f0ea',
+              DEFAULT: '#0f172a',
+            },
+          },
+          typography: {
+            DEFAULT: {
+              css: {
+                maxWidth: '65ch',
+                a: {
+                  textDecoration: 'none',
+                  fontWeight: '600',
+                  transitionProperty: 'transform, color',
+                  transitionDuration: '200ms',
+                },
+                'a:hover': {
+                  color: '#111827',
+                  transform: 'translateX(0.25rem)',
+                },
+                code: {
+                  backgroundColor: 'rgba(15,23,42,0.08)',
+                  padding: '0.1rem 0.35rem',
+                  borderRadius: '0.4rem',
+                  fontWeight: '500',
+                },
+                pre: null,
+              },
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #07080a;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-brand.light via-white to-white font-sans text-neutral-900 antialiased dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-900 dark:text-neutral-100">
+  <a href="#main-content" class="fixed left-4 top-4 z-[100] -translate-y-16 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform focus-visible:translate-y-0 dark:bg-neutral-100 dark:text-neutral-900">Skip to content</a>
+  <div class="relative flex min-h-screen flex-col">
+    <header class="sticky top-0 z-50 border-b border-neutral-200/80 bg-white/80 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-950/80">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <a href="index.html" class="inline-flex items-center gap-2 text-base font-semibold tracking-tight text-neutral-900 transition-transform duration-200 hover:-translate-y-0.5 dark:text-white">
+          <span aria-hidden="true">✺</span>
+          Wanderlust & Wonder
+        </a>
+        <nav aria-label="Primary" class="flex items-center gap-6 text-sm font-semibold">
+          <a href="index.html" class="inline-flex items-center gap-2 text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Home</a>
+          <a href="about.html" class="inline-flex items-center gap-2 text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">About</a>
+          <a href="archive.html" class="inline-flex items-center gap-2 text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Archive</a>
+          <a href="mailto:hello@example.com" class="inline-flex items-center gap-2 text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Contact</a>
+        </nav>
+      </div>
+    </header>
+    <main id="main-content" class="flex-1"><section class="py-20 sm:py-28">
+  <div class="mx-auto max-w-6xl px-4">
+    <header class="max-w-3xl">
+      <p class="text-sm font-medium uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">
+        <time datetime="2024-01-25">January 25, 2024</time>
+      </p>
+      <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-neutral-900 sm:text-5xl dark:text-white">Researching El Norte de España</h1>
+    </header>
+    <div class="mt-12 lg:flex lg:items-start lg:gap-16">
+      
+      <article class="prose prose-neutral mx-auto max-w-prose flex-1 px-1 text-base leading-relaxed dark:prose-invert">
+        <p>There&#x27;s something about northern Spain that calls to me. Maybe it&#x27;s the rugged coastline, the ancient Celtic heritage, or the way the mountains meet the sea. I&#x27;ve been researching the region for months now, and each discovery makes me more eager to visit.</p>
 <p>The Camino de Santiago has been on my bucket list forever, but I&#x27;m particularly drawn to the northern route - the Camino del Norte. It follows the coast from Irún to Santiago, passing through the Basque Country, Cantabria, Asturias, and Galicia. The scenery must be incredible.</p>
 <p>What fascinates me most is the cultural diversity. The Basque language, Euskera, is completely unrelated to any other European language. The Asturian bagpipes, the Celtic influence in Galicia - it&#x27;s like stepping into a different world within Spain itself.</p>
-<p>I&#x27;ve been reading about the fishing villages along the coast, places like San Sebastián and Santander. The food culture is incredible - fresh seafood, cider from Asturias, the famous <span class="glossary-term"><button type="button" class="glossary-trigger" popovertarget="glossary-popover-1">pintxos</button><aside id="glossary-popover-1" class="glossary-popover" popover="auto" role="note"><strong>pintxos</strong><span class="glossary-definition">Small bites served on bread, often skewered, that anchor the Basque bar-hopping ritual.</span></aside></span> in the Basque Country. Each region has its own culinary traditions.</p>
-<p>The architecture is another draw. From the Gothic cathedrals to the traditional <span class="glossary-term"><button type="button" class="glossary-trigger" popovertarget="glossary-popover-2">caseríos</button><aside id="glossary-popover-2" class="glossary-popover" popover="auto" role="note"><strong>caseríos</strong><span class="glossary-definition">Whitewashed Basque farmhouses built for multi-generational families.</span></aside></span> in the countryside, there&#x27;s such a rich variety. The Guggenheim in Bilbao is obviously famous, but I&#x27;m more interested in the smaller museums and cultural centers.</p>
+<p>I&#x27;ve been reading about the fishing villages along the coast, places like San Sebastián and Santander. The food culture is incredible - fresh seafood, cider from Asturias, the famous <span class="inline-flex items-center gap-1 align-baseline"><button type="button" class="underline decoration-dotted underline-offset-4 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500" popovertarget="glossary-popover-1">pintxos</button><aside id="glossary-popover-1" class="z-20 max-w-xs rounded-2xl border border-neutral-200/70 bg-white/95 p-4 text-sm leading-6 text-neutral-700 shadow-xl backdrop-blur-lg dark:border-white/10 dark:bg-neutral-900/95 dark:text-neutral-100" popover="auto" role="note"><strong class="block text-sm font-semibold text-neutral-900 dark:text-neutral-100">pintxos</strong><span class="mt-2 block text-sm text-neutral-600 dark:text-neutral-200">Small bites served on bread, often skewered, that anchor the Basque bar-hopping ritual.</span></aside></span> in the Basque Country. Each region has its own culinary traditions.</p>
+<p>The architecture is another draw. From the Gothic cathedrals to the traditional <span class="inline-flex items-center gap-1 align-baseline"><button type="button" class="underline decoration-dotted underline-offset-4 transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500" popovertarget="glossary-popover-2">caseríos</button><aside id="glossary-popover-2" class="z-20 max-w-xs rounded-2xl border border-neutral-200/70 bg-white/95 p-4 text-sm leading-6 text-neutral-700 shadow-xl backdrop-blur-lg dark:border-white/10 dark:bg-neutral-900/95 dark:text-neutral-100" popover="auto" role="note"><strong class="block text-sm font-semibold text-neutral-900 dark:text-neutral-100">caseríos</strong><span class="mt-2 block text-sm text-neutral-600 dark:text-neutral-200">Whitewashed Basque farmhouses built for multi-generational families.</span></aside></span> in the countryside, there&#x27;s such a rich variety. The Guggenheim in Bilbao is obviously famous, but I&#x27;m more interested in the smaller museums and cultural centers.</p>
 <p>Planning to spend at least a month there next spring. Want to walk parts of the Camino, explore the coastal towns, and really immerse myself in the local culture. Sometimes the best trips are the ones you research obsessively before going.</p>
 <p>El norte de España, te espero.</p>
-  </article>
+      </article>
+    </div>
+    <section class="mt-16 border-t border-neutral-200/70 pt-10 dark:border-neutral-800/60"><h2 class="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">Keep reading</h2><ul class="mt-6 grid gap-6 sm:grid-cols-2"><li class="group rounded-2xl border border-neutral-200/70 bg-white/60 p-5 shadow-sm backdrop-blur transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transform-none motion-reduce:shadow-none dark:border-neutral-800/60 dark:bg-white/5"><p class="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400"><time datetime="2024-02-28">Feb 28, 2024</time></p><a href="ios-deep-links-for-vless.html" class="mt-2 inline-flex items-center gap-2 text-base font-semibold text-neutral-800 transition-transform duration-200 hover:translate-x-1 dark:text-neutral-100">Understanding iOS Deep Links for VLESS Imports<span aria-hidden="true">→</span></a><p class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">Deep links let iOS hand off URLs directly to apps that have registered specific schemes. When the user taps a link with the streisand:// or v2box://…</p></li><li class="group rounded-2xl border border-neutral-200/70 bg-white/60 p-5 shadow-sm backdrop-blur transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transform-none motion-reduce:shadow-none dark:border-neutral-800/60 dark:bg-white/5"><p class="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400"><time datetime="2024-01-30">Jan 30, 2024</time></p><a href="how-this-blog-works.html" class="mt-2 inline-flex items-center gap-2 text-base font-semibold text-neutral-800 transition-transform duration-200 hover:translate-x-1 dark:text-neutral-100">How This Blog Works<span aria-hidden="true">→</span></a><p class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">This site is deliberately tiny—a static site Every story lives as a text file inside the posts/ folder, and python3 build.py glues them together into one…</p></li><li class="group rounded-2xl border border-neutral-200/70 bg-white/60 p-5 shadow-sm backdrop-blur transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg motion-reduce:transform-none motion-reduce:shadow-none dark:border-neutral-800/60 dark:bg-white/5"><p class="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500 dark:text-neutral-400"><time datetime="2024-01-20">Jan 20, 2024</time></p><a href="interesting-meeting-in-cement-museum.html" class="mt-2 inline-flex items-center gap-2 text-base font-semibold text-neutral-800 transition-transform duration-200 hover:translate-x-1 dark:text-neutral-100">Interesting Meeting in the Cement Museum<span aria-hidden="true">→</span></a><p class="mt-3 text-sm text-neutral-600 dark:text-neutral-300">You know those places that sound completely random but turn out to be unexpectedly fascinating? The Cement Museum in Novorossiysk is exactly that.</p></li></ul></section>
+  </div>
+</section>
 </main>
-<footer>
-  <p><a href="index.html">Back to all stories</a></p>
-</footer>
-<script type="speculationrules">
-{
-  "prefetch": [
-    {
-      "source": "list",
-      "urls": [
-        "index.html",
-        "ios-deep-links-for-vless.html",
-        "how-this-blog-works.html",
-        "interesting-meeting-in-cement-museum.html",
-        "great-weekend-in-almaty.html"
-      ]
-    }
-  ],
-  "prerender": [
-    {
-      "source": "list",
-      "urls": [
-        "index.html",
-        "ios-deep-links-for-vless.html",
-        "how-this-blog-works.html",
-        "interesting-meeting-in-cement-museum.html",
-        "great-weekend-in-almaty.html"
-      ],
-      "eagerness": "moderate"
-    }
-  ]
-}
-</script>
+    <footer class="mt-24 border-t border-neutral-200/80 bg-white/60 py-12 backdrop-blur dark:border-white/10 dark:bg-neutral-950/60">
+      <div class="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">Stay in touch</p>
+          <p class="mt-3 text-sm text-neutral-500 dark:text-neutral-400">© 2025 Wanderlust & Wonder. Built for clarity and longevity.</p>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Email: <a href="mailto:hello@example.com" class="inline-flex items-center gap-2 font-medium text-neutral-700 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white">hello@example.com <span aria-hidden="true">→</span></a></p>
+        </div>
+        <ul class="flex flex-wrap items-center gap-3 text-sm"><li><a href="https://github.com/example" class="group inline-flex items-center gap-2 text-sm font-medium text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">GitHub<span aria-hidden="true" class="transition-transform duration-200 group-hover:translate-x-1">→</span></a></li>
+<li><a href="https://hachyderm.io/@example" class="group inline-flex items-center gap-2 text-sm font-medium text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Mastodon<span aria-hidden="true" class="transition-transform duration-200 group-hover:translate-x-1">→</span></a></li>
+<li><a href="mailto:hello@example.com" class="group inline-flex items-center gap-2 text-sm font-medium text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Email<span aria-hidden="true" class="transition-transform duration-200 group-hover:translate-x-1">→</span></a></li></ul>
+      </div>
+    </footer>
+  </div>
 </body>
 </html>
