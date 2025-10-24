@@ -1,38 +1,65 @@
 # Wanderlust & Wonder
 
-This repository holds a minimal static blog: plain text posts plus one small Python script that renders an index page, per-post pages, and a shared stylesheet.
+A premium static travel blog powered by one Python script and Tailwind CSS via CDN. Content lives in plain-text files, rendering to production-ready HTML in `docs/` for GitHub Pages.
 
-## How it works
+## Quick start
 
-- Write stories as plain text or Markdown files in `posts/` (use the `.txt` or `.md` extension).
-- Run `python3 build.py`.
-- Open `docs/index.html` (the home page) or push to GitHub Pages.
-
-The build step rewrites only three things: the home page, one HTML file per post, and `docs/style.css`.
-Anything else left in `docs/` gets cleaned up automatically so the folder always mirrors the posts that exist.
-
-## Writing a post
-
-1. Create a new file whose name starts with the date:
+1. Write posts inside `posts/` using the filename pattern `YYYY-MM-DD-slug.txt` (Markdown is also accepted).
+2. Put the title on the first non-empty line; the rest of the file becomes the body.
+3. Run:
+   ```bash
+   python3 build.py
    ```
-   posts/2024-02-01-new-adventure.txt
-   posts/2024-02-01-new-adventure.md
-   ```
-2. Put the title on the first non-empty line. If you're writing Markdown, you can optionally start with `# Title` and the build
-   script will reuse the heading text.
-3. The builder understands common Markdown touches like headings, inline code, emphasis, and lists (using `- ` or numbered
-   lines).
-4. Run `python3 build.py` to refresh the HTML files in `docs/`.
+4. Open `docs/index.html` locally or push the repo — GitHub Pages can publish the `docs/` directory as-is.
 
-To delete a story, remove its file and rebuild.
+Removing a post is as simple as deleting its file and running `build.py` again. The builder also cleans up stale HTML in `docs/`.
 
-## Local preview
+## Design system & theming
 
-```bash
-python3 build.py
-open docs/index.html  # or use any browser
+- Tailwind CSS (CDN) + Typography plugin drive all styling — no custom stylesheet.
+- Light and dark themes respect `prefers-color-scheme`.
+- Responsive layouts feature a glassmorphism hero, sticky nav, and bento grid cards with hover microinteractions that fall back gracefully with `prefers-reduced-motion`.
+- Post pages use Tailwind `prose` typography, dark code blocks, and an optional sticky table of contents on large screens.
+
+## Templates
+
+Shared UI lives in `templates/`:
+
+- `base.html` — HTML shell, meta tags, navigation, and footer.
+- `index.html` — hero section plus the responsive post grid.
+- `post.html` — article layout, sticky TOC placeholder, and related posts block.
+- `about.html` — long-form introduction and design philosophy.
+- `archive.html` — year-grouped catalog of every story.
+
+The builder injects content into these templates using Python’s `string.Template`. Adjusting layout or Tailwind classes happens in these files.
+
+## Generator data model
+
+Each post becomes:
+
+- `title`: derived from the first non-empty line or Markdown heading.
+- `date`: parsed from the filename (`YYYY-MM-DD`).
+- `slug`: filename slug reused for URLs.
+- `summary`: first paragraph of body text (markdown stripped).
+- `description`: summary trimmed to ~155 characters (used for meta tags).
+- `body_html`: HTML rendered from the post body (headings receive IDs, code blocks styled).
+- `headings`: list of `{level, text, anchor}` for building the table of contents.
+
+These fields drive the home page cards, metadata, table of contents, and related posts list.
+
+## Output structure
+
+Running `python3 build.py` produces:
+
+```
+├── docs/
+│   ├── index.html      # Home page with hero + post grid
+│   ├── about.html      # About page rendered from template content
+│   ├── archive.html    # Yearly archive with summaries
+│   └── *.html          # One page per post (same slug as source file)
+├── posts/              # Plain text source files (inputs)
+├── templates/          # Base + page-specific templates
+└── build.py            # Static-site generator
 ```
 
-## Deploying to GitHub Pages
-
-Set the repository's Pages source to the `docs/` folder. Each time you rebuild and push, the index and post pages update automatically.
+GitHub Pages can point directly at `docs/`. No additional build step or runtime dependencies are required.

@@ -1,302 +1,131 @@
 <!DOCTYPE html>
-<html lang="en">
-<meta charset="utf-8">
-<title>Wanderlust &amp; Wonder</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="style.css">
-<body class="home">
-<header>
-  <h1>Wanderlust &amp; Wonder</h1>
-  <p>Tiny stories from the road</p>
-</header>
-<main class="feed">
-<article class="post-card">
-      <template shadowrootmode="open">
-        <style>
-          :host {
-            display: block;
-          }
-          .card {
-            display: grid;
-            gap: 0.75rem;
-          }
-          header {
-            margin: 0;
-          }
-          .meta {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          .summary {
-            display: grid;
-            gap: 0.65rem;
-          }
-          ::slotted(h2) {
-            margin: 0;
-            font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.7rem);
-          }
-          ::slotted(.post-date) {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          ::slotted(p) {
-            margin: 0;
-          }
-        </style>
-        <article class="card" part="surface">
-          <header part="header">
-            <slot name="title"></slot>
-          </header>
-          <div class="meta" part="meta">
-            <slot name="date"></slot>
-          </div>
-          <div class="summary" part="summary">
-            <slot></slot>
-          </div>
-        </article>
-      </template>
-      <h2 slot="title"><a href="ios-deep-links-for-vless.html">Understanding iOS Deep Links for VLESS Imports</a></h2>
-      <p slot="date" class="post-date"><time datetime="2024-02-28">February 28, 2024</time></p>
-      <p>Deep links let iOS hand off URLs directly to apps that have registered specific schemes. When the user taps a link with the <code>streisand://</code> or <code>v2box://</code> scheme, the operating system looks for a matching app identifier and, if present, launches the app while passing everything after the scheme as parameters.</p>
-    </article>
-<article class="post-card">
-      <template shadowrootmode="open">
-        <style>
-          :host {
-            display: block;
-          }
-          .card {
-            display: grid;
-            gap: 0.75rem;
-          }
-          header {
-            margin: 0;
-          }
-          .meta {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          .summary {
-            display: grid;
-            gap: 0.65rem;
-          }
-          ::slotted(h2) {
-            margin: 0;
-            font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.7rem);
-          }
-          ::slotted(.post-date) {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          ::slotted(p) {
-            margin: 0;
-          }
-        </style>
-        <article class="card" part="surface">
-          <header part="header">
-            <slot name="title"></slot>
-          </header>
-          <div class="meta" part="meta">
-            <slot name="date"></slot>
-          </div>
-          <div class="summary" part="summary">
-            <slot></slot>
-          </div>
-        </article>
-      </template>
-      <h2 slot="title"><a href="how-this-blog-works.html">How This Blog Works</a></h2>
-      <p slot="date" class="post-date"><time datetime="2024-01-30">January 30, 2024</time></p>
-      <p>This site is deliberately tiny—a <span class="glossary-term"><button type="button" class="glossary-trigger" popovertarget="glossary-popover-1">static site</button><aside id="glossary-popover-1" class="glossary-popover" popover="auto" role="note"><strong>static site</strong><span class="glossary-definition">A collection of pages that are prebuilt ahead of time and can be served as-is from any web host.</span></aside></span> Every story lives as a text file inside the <code>posts/</code> folder, and <code>python3 build.py</code> glues them together into one HTML page at <code>docs/index.html</code>.</p>
-    </article>
-<article class="post-card">
-      <template shadowrootmode="open">
-        <style>
-          :host {
-            display: block;
-          }
-          .card {
-            display: grid;
-            gap: 0.75rem;
-          }
-          header {
-            margin: 0;
-          }
-          .meta {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          .summary {
-            display: grid;
-            gap: 0.65rem;
-          }
-          ::slotted(h2) {
-            margin: 0;
-            font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.7rem);
-          }
-          ::slotted(.post-date) {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          ::slotted(p) {
-            margin: 0;
-          }
-        </style>
-        <article class="card" part="surface">
-          <header part="header">
-            <slot name="title"></slot>
-          </header>
-          <div class="meta" part="meta">
-            <slot name="date"></slot>
-          </div>
-          <div class="summary" part="summary">
-            <slot></slot>
-          </div>
-        </article>
-      </template>
-      <h2 slot="title"><a href="researching-el-norte-de-espana.html">Researching El Norte de España</a></h2>
-      <p slot="date" class="post-date"><time datetime="2024-01-25">January 25, 2024</time></p>
-      <p>There&#x27;s something about northern Spain that calls to me. Maybe it&#x27;s the rugged coastline, the ancient Celtic heritage, or the way the mountains meet the sea. I&#x27;ve been researching the region for months now, and each discovery makes me more eager to visit.</p>
-    </article>
-<article class="post-card">
-      <template shadowrootmode="open">
-        <style>
-          :host {
-            display: block;
-          }
-          .card {
-            display: grid;
-            gap: 0.75rem;
-          }
-          header {
-            margin: 0;
-          }
-          .meta {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          .summary {
-            display: grid;
-            gap: 0.65rem;
-          }
-          ::slotted(h2) {
-            margin: 0;
-            font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.7rem);
-          }
-          ::slotted(.post-date) {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          ::slotted(p) {
-            margin: 0;
-          }
-        </style>
-        <article class="card" part="surface">
-          <header part="header">
-            <slot name="title"></slot>
-          </header>
-          <div class="meta" part="meta">
-            <slot name="date"></slot>
-          </div>
-          <div class="summary" part="summary">
-            <slot></slot>
-          </div>
-        </article>
-      </template>
-      <h2 slot="title"><a href="interesting-meeting-in-cement-museum.html">Interesting Meeting in the Cement Museum</a></h2>
-      <p slot="date" class="post-date"><time datetime="2024-01-20">January 20, 2024</time></p>
-      <p>You know those places that sound completely random but turn out to be unexpectedly fascinating? The Cement Museum in Novorossiysk is exactly that.</p>
-    </article>
-<article class="post-card">
-      <template shadowrootmode="open">
-        <style>
-          :host {
-            display: block;
-          }
-          .card {
-            display: grid;
-            gap: 0.75rem;
-          }
-          header {
-            margin: 0;
-          }
-          .meta {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          .summary {
-            display: grid;
-            gap: 0.65rem;
-          }
-          ::slotted(h2) {
-            margin: 0;
-            font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.7rem);
-          }
-          ::slotted(.post-date) {
-            margin: 0;
-            font-size: 0.9rem;
-            color: color-mix(in srgb, currentColor 55%, transparent);
-          }
-          ::slotted(p) {
-            margin: 0;
-          }
-        </style>
-        <article class="card" part="surface">
-          <header part="header">
-            <slot name="title"></slot>
-          </header>
-          <div class="meta" part="meta">
-            <slot name="date"></slot>
-          </div>
-          <div class="summary" part="summary">
-            <slot></slot>
-          </div>
-        </article>
-      </template>
-      <h2 slot="title"><a href="great-weekend-in-almaty.html">Great Weekend in Almaty</a></h2>
-      <p slot="date" class="post-date"><time datetime="2024-01-15">January 15, 2024</time></p>
-      <p>Almaty never fails to surprise me. This weekend was particularly magical - the kind that makes you fall in love with a city all over again.</p>
-    </article>
+<html lang="en" class="h-full scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <title>Wanderlust &amp; Wonder · Tiny stories from the road</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tiny stories from the road">
+  <meta name="color-scheme" content="light dark">
+  
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'media',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+          },
+          colors: {
+            brand: {
+              light: '#f5f0ea',
+              DEFAULT: '#0f172a',
+            },
+          },
+          typography: {
+            DEFAULT: {
+              css: {
+                maxWidth: '65ch',
+                a: {
+                  textDecoration: 'none',
+                  fontWeight: '600',
+                  transitionProperty: 'transform, color',
+                  transitionDuration: '200ms',
+                },
+                'a:hover': {
+                  color: '#111827',
+                  transform: 'translateX(0.25rem)',
+                },
+                code: {
+                  backgroundColor: 'rgba(15,23,42,0.08)',
+                  padding: '0.1rem 0.35rem',
+                  borderRadius: '0.4rem',
+                  fontWeight: '500',
+                },
+                pre: null,
+              },
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #07080a;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-brand.light via-white to-white font-sans text-neutral-900 antialiased dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-900 dark:text-neutral-100">
+  <a href="#main-content" class="fixed left-4 top-4 z-[100] -translate-y-16 rounded-full bg-neutral-900 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform focus-visible:translate-y-0 dark:bg-neutral-100 dark:text-neutral-900">Skip to content</a>
+  <div class="relative flex min-h-screen flex-col">
+    <header class="sticky top-0 z-50 border-b border-neutral-200/80 bg-white/80 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-950/80">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <a href="index.html" class="inline-flex items-center gap-2 text-base font-semibold tracking-tight text-neutral-900 transition-transform duration-200 hover:-translate-y-0.5 dark:text-white">
+          <span aria-hidden="true">✺</span>
+          Wanderlust & Wonder
+        </a>
+        <nav aria-label="Primary" class="flex items-center gap-6 text-sm font-semibold">
+          <a href="index.html" class="inline-flex items-center gap-2 text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Home</a>
+          <a href="about.html" class="inline-flex items-center gap-2 text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">About</a>
+          <a href="archive.html" class="inline-flex items-center gap-2 text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Archive</a>
+          <a href="mailto:hello@example.com" class="inline-flex items-center gap-2 text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Contact</a>
+        </nav>
+      </div>
+    </header>
+    <main id="main-content" class="flex-1"><section class="relative isolate overflow-hidden py-24 sm:py-32">
+  <div class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.9),_rgba(255,255,255,0))] dark:bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.1),_rgba(0,0,0,0))]"></div>
+  <div class="mx-auto max-w-6xl px-4">
+    <div class="relative overflow-hidden rounded-[2.5rem] border border-white/50 bg-white/70 p-12 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-white/10">
+      <p class="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-300">Dispatches</p>
+      <h1 class="mt-6 text-4xl font-extrabold tracking-tight text-neutral-900 sm:text-5xl dark:text-white">Wanderlust & Wonder</h1>
+      <p class="mt-4 max-w-2xl text-lg text-neutral-600 dark:text-neutral-300">Tiny stories from the road</p>
+      <div class="mt-8 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-500 dark:text-neutral-300">
+        <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200/70 bg-white/70 px-4 py-2 backdrop-blur-sm dark:border-white/10 dark:bg-white/5">Glassmorphism, zero frameworks</span>
+        <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200/70 bg-white/70 px-4 py-2 backdrop-blur-sm dark:border-white/10 dark:bg-white/5">Slow travel mindset</span>
+        <span class="inline-flex items-center gap-2 rounded-full border border-neutral-200/70 bg-white/70 px-4 py-2 backdrop-blur-sm dark:border-white/10 dark:bg-white/5">Prefers daylight trains</span>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="pb-24 sm:pb-32">
+  <div class="mx-auto max-w-6xl px-4">
+    <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3" role="list">
+      <article class="group relative flex h-full flex-col justify-between rounded-3xl border border-neutral-200/70 bg-white/80 p-6 shadow-sm backdrop-blur transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-xl motion-reduce:transform-none motion-reduce:shadow-none dark:border-neutral-800/60 dark:bg-white/5"><div class="flex flex-col gap-4"><p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400"><time datetime="2024-02-28">February 28, 2024</time></p><h2 class="text-2xl font-semibold leading-tight text-neutral-900 dark:text-white"><a href="ios-deep-links-for-vless.html" class="inline-flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-1">Understanding iOS Deep Links for VLESS Imports<span aria-hidden="true" class="text-lg">→</span></a></h2><p class="text-base text-neutral-600 dark:text-neutral-300">Deep links let iOS hand off URLs directly to apps that have registered specific schemes. When the user taps a link with the streisand:// or v2box:// scheme, the operating system looks for a matching app identifier and, if present, launches the app while passing everything after the scheme as parameters.</p></div><div class="mt-6 flex items-center justify-between"><a href="ios-deep-links-for-vless.html" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-700 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white" aria-label="Read Understanding iOS Deep Links for VLESS Imports">Read<span aria-hidden="true">→</span></a></div></article>
+<article class="group relative flex h-full flex-col justify-between rounded-3xl border border-neutral-200/70 bg-white/80 p-6 shadow-sm backdrop-blur transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-xl motion-reduce:transform-none motion-reduce:shadow-none dark:border-neutral-800/60 dark:bg-white/5"><div class="flex flex-col gap-4"><p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400"><time datetime="2024-01-30">January 30, 2024</time></p><h2 class="text-2xl font-semibold leading-tight text-neutral-900 dark:text-white"><a href="how-this-blog-works.html" class="inline-flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-1">How This Blog Works<span aria-hidden="true" class="text-lg">→</span></a></h2><p class="text-base text-neutral-600 dark:text-neutral-300">This site is deliberately tiny—a static site Every story lives as a text file inside the posts/ folder, and python3 build.py glues them together into one HTML page at docs/index.html.</p></div><div class="mt-6 flex items-center justify-between"><a href="how-this-blog-works.html" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-700 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white" aria-label="Read How This Blog Works">Read<span aria-hidden="true">→</span></a></div></article>
+<article class="group relative flex h-full flex-col justify-between rounded-3xl border border-neutral-200/70 bg-white/80 p-6 shadow-sm backdrop-blur transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-xl motion-reduce:transform-none motion-reduce:shadow-none dark:border-neutral-800/60 dark:bg-white/5"><div class="flex flex-col gap-4"><p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400"><time datetime="2024-01-25">January 25, 2024</time></p><h2 class="text-2xl font-semibold leading-tight text-neutral-900 dark:text-white"><a href="researching-el-norte-de-espana.html" class="inline-flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-1">Researching El Norte de España<span aria-hidden="true" class="text-lg">→</span></a></h2><p class="text-base text-neutral-600 dark:text-neutral-300">There&#x27;s something about northern Spain that calls to me. Maybe it&#x27;s the rugged coastline, the ancient Celtic heritage, or the way the mountains meet the sea. I&#x27;ve been researching the region for months now, and each discovery makes me more eager to visit.</p></div><div class="mt-6 flex items-center justify-between"><a href="researching-el-norte-de-espana.html" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-700 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white" aria-label="Read Researching El Norte de España">Read<span aria-hidden="true">→</span></a></div></article>
+<article class="group relative flex h-full flex-col justify-between rounded-3xl border border-neutral-200/70 bg-white/80 p-6 shadow-sm backdrop-blur transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-xl motion-reduce:transform-none motion-reduce:shadow-none dark:border-neutral-800/60 dark:bg-white/5"><div class="flex flex-col gap-4"><p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400"><time datetime="2024-01-20">January 20, 2024</time></p><h2 class="text-2xl font-semibold leading-tight text-neutral-900 dark:text-white"><a href="interesting-meeting-in-cement-museum.html" class="inline-flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-1">Interesting Meeting in the Cement Museum<span aria-hidden="true" class="text-lg">→</span></a></h2><p class="text-base text-neutral-600 dark:text-neutral-300">You know those places that sound completely random but turn out to be unexpectedly fascinating? The Cement Museum in Novorossiysk is exactly that.</p></div><div class="mt-6 flex items-center justify-between"><a href="interesting-meeting-in-cement-museum.html" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-700 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white" aria-label="Read Interesting Meeting in the Cement Museum">Read<span aria-hidden="true">→</span></a></div></article>
+<article class="group relative flex h-full flex-col justify-between rounded-3xl border border-neutral-200/70 bg-white/80 p-6 shadow-sm backdrop-blur transition-transform duration-300 hover:-translate-y-0.5 hover:shadow-xl motion-reduce:transform-none motion-reduce:shadow-none dark:border-neutral-800/60 dark:bg-white/5"><div class="flex flex-col gap-4"><p class="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400"><time datetime="2024-01-15">January 15, 2024</time></p><h2 class="text-2xl font-semibold leading-tight text-neutral-900 dark:text-white"><a href="great-weekend-in-almaty.html" class="inline-flex items-center gap-2 transition-transform duration-200 group-hover:translate-x-1">Great Weekend in Almaty<span aria-hidden="true" class="text-lg">→</span></a></h2><p class="text-base text-neutral-600 dark:text-neutral-300">Almaty never fails to surprise me. This weekend was particularly magical - the kind that makes you fall in love with a city all over again.</p></div><div class="mt-6 flex items-center justify-between"><a href="great-weekend-in-almaty.html" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-700 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white" aria-label="Read Great Weekend in Almaty">Read<span aria-hidden="true">→</span></a></div></article>
+    </div>
+  </div>
+</section>
 </main>
-<footer>
-  <p>Built with plain text files and a small Python script.</p>
-</footer>
-<script type="speculationrules">
-{
-  "prefetch": [
-    {
-      "source": "list",
-      "urls": [
-        "ios-deep-links-for-vless.html",
-        "how-this-blog-works.html",
-        "researching-el-norte-de-espana.html",
-        "interesting-meeting-in-cement-museum.html",
-        "great-weekend-in-almaty.html"
-      ]
-    }
-  ],
-  "prerender": [
-    {
-      "source": "list",
-      "urls": [
-        "ios-deep-links-for-vless.html",
-        "how-this-blog-works.html",
-        "researching-el-norte-de-espana.html",
-        "interesting-meeting-in-cement-museum.html",
-        "great-weekend-in-almaty.html"
-      ],
-      "eagerness": "moderate"
-    }
-  ]
-}
-</script>
+    <footer class="mt-24 border-t border-neutral-200/80 bg-white/60 py-12 backdrop-blur dark:border-white/10 dark:bg-neutral-950/60">
+      <div class="mx-auto flex max-w-6xl flex-col gap-8 px-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-[0.3em] text-neutral-500 dark:text-neutral-400">Stay in touch</p>
+          <p class="mt-3 text-sm text-neutral-500 dark:text-neutral-400">© 2025 Wanderlust & Wonder. Built for clarity and longevity.</p>
+          <p class="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Email: <a href="mailto:hello@example.com" class="inline-flex items-center gap-2 font-medium text-neutral-700 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-200 dark:hover:text-white">hello@example.com <span aria-hidden="true">→</span></a></p>
+        </div>
+        <ul class="flex flex-wrap items-center gap-3 text-sm"><li><a href="https://github.com/example" class="group inline-flex items-center gap-2 text-sm font-medium text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">GitHub<span aria-hidden="true" class="transition-transform duration-200 group-hover:translate-x-1">→</span></a></li>
+<li><a href="https://hachyderm.io/@example" class="group inline-flex items-center gap-2 text-sm font-medium text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Mastodon<span aria-hidden="true" class="transition-transform duration-200 group-hover:translate-x-1">→</span></a></li>
+<li><a href="mailto:hello@example.com" class="group inline-flex items-center gap-2 text-sm font-medium text-neutral-600 transition-transform duration-200 hover:translate-x-1 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white">Email<span aria-hidden="true" class="transition-transform duration-200 group-hover:translate-x-1">→</span></a></li></ul>
+      </div>
+    </footer>
+  </div>
 </body>
 </html>
