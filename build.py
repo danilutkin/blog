@@ -493,7 +493,7 @@ def render_index(posts: Iterable[Post]) -> str:
         summary_html = summary if summary else ""
         card_html = f"""
     <article class=\"post-card\">
-      <template shadowroot=\"open\">
+      <template shadowrootmode=\"open\">
         <style>
           :host {{
             display: block;
