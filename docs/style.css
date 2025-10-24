@@ -1,115 +1,75 @@
-/* Tiny, readable defaults with modern touches */
+/* Minimal Hacker News-inspired styling */
 :root {
-  color-scheme: light dark;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1.6;
-  margin: 0;
-  --surface: color-mix(in srgb, Canvas 92%, CanvasText 8%);
-  --surface-border: color-mix(in srgb, CanvasText 20%, transparent);
-  --card-radius: 1.1rem;
+  color-scheme: light;
+  font-family: Verdana, Geneva, sans-serif;
+  line-height: 1.4;
 }
+
 body {
-  background: color-mix(in srgb, Canvas 98%, CanvasText 3%);
-  margin: 0 auto;
-  max-width: 52rem;
-  padding: 2.5rem 1.5rem 4rem;
+  background-color: #f6f6ef;
+  color: #2c2c2c;
+  margin: 0;
+  font-size: 14px;
 }
+
+header {
+  background-color: #ff6600;
+  color: #000;
+  border-bottom: 2px solid #d44a00;
+  padding: 8px 12px;
+}
+
+header h1 {
+  font-size: 18px;
+  margin: 0;
+}
+
+header p {
+  margin: 4px 0 0;
+}
+
+main {
+  margin: 16px auto;
+  max-width: 760px;
+  padding: 0 12px 24px;
+}
+
+article {
+  border-bottom: 1px solid #e0e0d6;
+  padding: 12px 0;
+}
+
+article:last-of-type {
+  border-bottom: none;
+}
+
+h2 {
+  font-size: 16px;
+  margin: 0 0 4px;
+}
+
+.post-date {
+  color: #828282;
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+
 a {
   color: inherit;
+  text-decoration: none;
 }
-header,
+
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
 footer {
+  border-top: 1px solid #e0e0d6;
+  color: #828282;
+  font-size: 12px;
+  margin: 24px auto 0;
+  max-width: 760px;
+  padding: 12px;
   text-align: center;
-  margin-bottom: 2.5rem;
-}
-main.feed {
-  display: grid;
-  gap: 2rem;
-}
-.post-card {
-  background: var(--surface);
-  border: 1px solid var(--surface-border);
-  border-radius: var(--card-radius);
-  box-shadow: 0 1rem 2rem -1.5rem color-mix(in srgb, CanvasText 40%, transparent);
-  padding: 1.75rem;
-  transition: transform 150ms ease, box-shadow 150ms ease;
-}
-.post-card:hover,
-.post-card:focus-within {
-  transform: translateY(-4px);
-  box-shadow: 0 1.35rem 2.75rem -1.5rem color-mix(in srgb, CanvasText 45%, transparent);
-}
-.post-card h2 {
-  margin: 0 0 0.35rem;
-  font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.7rem);
-}
-.post-card > .post-date {
-  color: color-mix(in srgb, CanvasText 55%, transparent);
-  font-size: 0.9rem;
-  margin: 0;
-}
-.post-card > p {
-  margin-top: 0.9rem;
-}
-.post-date {
-  color: color-mix(in srgb, CanvasText 55%, transparent);
-  font-size: 0.9rem;
-  margin-top: -0.25rem;
-}
-ul {
-  padding-left: 1.2rem;
-}
-pre,
-code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-}
-.glossary-term {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.4rem;
-}
-.glossary-trigger {
-  background: none;
-  border: 0;
-  border-bottom: 1px dashed currentColor;
-  cursor: pointer;
-  font: inherit;
-  padding: 0;
-  text-align: left;
-}
-.glossary-trigger:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 3px;
-}
-.glossary-popover {
-  background: var(--surface);
-  border: 1px solid var(--surface-border);
-  border-radius: 0.75rem;
-  box-shadow: 0 1.75rem 3rem -2rem color-mix(in srgb, CanvasText 40%, transparent);
-  margin: 0;
-  max-width: min(24rem, 80vw);
-  padding: 1rem 1.25rem;
-}
-.glossary-popover:popover-open {
-  animation: popover-in 120ms ease;
-}
-.glossary-popover strong {
-  display: block;
-  font-size: 0.95rem;
-  margin-bottom: 0.4rem;
-}
-.glossary-definition {
-  display: block;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-@keyframes popover-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
