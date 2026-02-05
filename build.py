@@ -3,14 +3,17 @@
 
 from __future__ import annotations
 
+import argparse
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
+import subprocess
 import html
 import re
 from string import Template
 from textwrap import shorten
 from typing import Iterable
+import sys
 
 POSTS_DIR = Path("posts")
 OUTPUT_DIR = Path("docs")
@@ -227,6 +230,172 @@ def slugify(value: str) -> str:
     slug = re.sub(r"[^a-z0-9]+", "-", value.lower())
     slug = slug.strip("-")
     return slug or "section"
+
+
+def normalize_whitespace(text: str) -> str:
+    return "\n".join(line.rstrip() for line in text.replace("\r\n", "\n").splitlines())
+
+
+METADATA_PATTERNS = [
+    re.compile(
+        r"^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),?\s+"
+        r"[A-Za-z]+\s+\d{1,2},\s+\d{4}(\s+at\s+\d{1,2}:\d{2}\s+[AP]M)?$"
+    ),
+    re.compile(r"^[A-Za-z]+\s+\d{1,2},\s+\d{4}(\s+at\s+\d{1,2}:\d{2}\s+[AP]M)?$"),
+    re.compile(r"^\d{1,2}:\d{2}\s+[AP]M$"),
+    re.compile(r"^(Created|Updated)\s+.+$"),
+]
+
+
+def looks_like_metadata(line: str) -> bool:
+    stripped = line.strip()
+    if not stripped:
+        return False
+    for pattern in METADATA_PATTERNS:
+        if pattern.match(stripped):
+            return True
+    return False
+
+
+def transform_bullet(line: str) -> str:
+    stripped = line.lstrip()
+    prefix = line[: len(line) - len(stripped)]
+    bullet_replacements = {
+        "•": "-",
+        "◦": "  -",
+        "▪": "-",
+        "‣": "-",
+        "–": "-",
+        "—": "-",
+        "○": "- [ ]",
+        "●": "- [x]",
+    }
+    for symbol, replacement in bullet_replacements.items():
+        if stripped.startswith(symbol + " "):
+            return prefix + replacement + stripped[len(symbol) :]
+        if stripped.startswith(symbol + "\t"):
+            return prefix + replacement + " " + stripped[len(symbol) + 1 :]
+        if stripped == symbol:
+            return prefix + replacement
+    return line
+
+
+def convert_apple_note(text: str) -> tuple[str, str]:
+    normalized = normalize_whitespace(text)
+    lines = [line.replace("\u00a0", " ") for line in normalized.split("\n")]
+
+    title = ""
+    body_lines: list[str] = []
+    for line in lines:
+        if not title and line.strip():
+            title = line.strip()
+            continue
+        if title:
+            body_lines.append(line)
+
+    if not title:
+        title = "Untitled Note"
+
+    while body_lines and not body_lines[0].strip():
+        body_lines.pop(0)
+
+    while True:
+        removed = False
+        if body_lines and looks_like_metadata(body_lines[0]):
+            body_lines.pop(0)
+            removed = True
+        elif (
+            len(body_lines) >= 2
+            and body_lines[0].strip()
+            and "," in body_lines[0]
+            and looks_like_metadata(body_lines[1])
+        ):
+            body_lines.pop(0)
+            removed = True
+
+        if removed:
+            while body_lines and not body_lines[0].strip():
+                body_lines.pop(0)
+        else:
+            break
+
+    converted_lines: list[str] = []
+    for line in body_lines:
+        if not line.strip():
+            if converted_lines and converted_lines[-1]:
+                converted_lines.append("")
+            continue
+        converted_lines.append(transform_bullet(line.rstrip()))
+
+    body = "\n".join(converted_lines).strip()
+    return title, body
+
+
+def read_clipboard_text(use_stdin: bool = False) -> str:
+    if use_stdin:
+        return sys.stdin.read()
+
+    if sys.platform == "darwin":
+        try:
+            completed = subprocess.run(
+                ["pbpaste"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return completed.stdout
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            pass
+
+    raise RuntimeError(
+        "Clipboard capture failed. Re-run with --stdin and paste the note content manually."
+    )
+
+
+def ensure_posts_dir() -> None:
+    POSTS_DIR.mkdir(exist_ok=True)
+
+
+def next_post_path(post_date: date, slug: str) -> Path:
+    date_str = post_date.strftime("%Y-%m-%d")
+    base = POSTS_DIR / f"{date_str}-{slug}.txt"
+    if not base.exists():
+        return base
+
+    counter = 2
+    while True:
+        candidate = POSTS_DIR / f"{date_str}-{slug}-{counter}.txt"
+        if not candidate.exists():
+            return candidate
+        counter += 1
+
+
+def capture_post_from_clipboard(
+    *,
+    post_date: date | None = None,
+    desired_slug: str | None = None,
+    use_stdin: bool = False,
+) -> Path:
+    raw = read_clipboard_text(use_stdin=use_stdin)
+    if not raw.strip():
+        raise RuntimeError("Clipboard is empty. Copy a note first or use --stdin.")
+
+    title, body = convert_apple_note(raw)
+    if not body:
+        body = ""
+
+    slug = slugify(desired_slug or title)
+    post_date = post_date or date.today()
+
+    ensure_posts_dir()
+    target_path = next_post_path(post_date, slug)
+    content_lines = [title.strip()]
+    if body:
+        content_lines.append("")
+        content_lines.append(body.strip())
+    content = "\n".join(content_lines).strip() + "\n"
+    target_path.write_text(content, encoding="utf-8")
+    return target_path
 
 
 def render_body(body: str) -> RenderedBody:
@@ -653,5 +822,66 @@ def build() -> None:
     )
 
 
-if __name__ == "__main__":
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Static blog helper utilities")
+    subparsers = parser.add_subparsers(dest="command")
+
+    build_parser = subparsers.add_parser("build", help="Render the site")
+    build_parser.set_defaults(command="build")
+
+    capture_parser = subparsers.add_parser(
+        "capture", help="Convert the current Apple Note into a blog post"
+    )
+    capture_parser.add_argument(
+        "--date",
+        help="Publication date in YYYY-MM-DD format (defaults to today)",
+    )
+    capture_parser.add_argument(
+        "--slug",
+        help="Custom slug to use for the post filename",
+    )
+    capture_parser.add_argument(
+        "--stdin",
+        action="store_true",
+        help="Read note content from standard input instead of the clipboard",
+    )
+
+    parser.set_defaults(command="build")
+    return parser.parse_args(argv)
+
+
+def handle_capture(args: argparse.Namespace) -> None:
+    post_date = None
+    if args.date:
+        try:
+            post_date = datetime.strptime(args.date, "%Y-%m-%d").date()
+        except ValueError as exc:
+            raise SystemExit(f"Invalid date '{args.date}': {exc}") from exc
+
+    try:
+        post_path = capture_post_from_clipboard(
+            post_date=post_date,
+            desired_slug=args.slug,
+            use_stdin=args.stdin,
+        )
+    except RuntimeError as exc:
+        raise SystemExit(str(exc)) from exc
+
+    try:
+        display_path = post_path.relative_to(Path.cwd())
+    except ValueError:
+        display_path = post_path
+    print(f"Created {display_path}")
     build()
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
+    if args.command == "capture":
+        handle_capture(args)
+    else:
+        build()
+
+
+if __name__ == "__main__":
+    main()

@@ -6,11 +6,17 @@ A premium static travel blog powered by one Python script and Tailwind CSS via C
 
 1. Write posts inside `posts/` using the filename pattern `YYYY-MM-DD-slug.txt` (Markdown is also accepted).
 2. Put the title on the first non-empty line; the rest of the file becomes the body.
-3. Run:
+3. To turn an Apple Note into a post, copy the note and run:
+   ```bash
+   python3 build.py capture
+   ```
+   The script reads from the macOS clipboard, cleans up bullet points and metadata, creates a correctly named file inside `posts/`,
+   and rebuilds the site. You can also pipe note text manually with `--stdin` or pick a publication date via `--date YYYY-MM-DD`.
+4. To regenerate the site without capturing a note, run:
    ```bash
    python3 build.py
    ```
-4. Open `docs/index.html` locally or push the repo — GitHub Pages can publish the `docs/` directory as-is.
+5. Open `docs/index.html` locally or push the repo — GitHub Pages can publish the `docs/` directory as-is.
 
 Removing a post is as simple as deleting its file and running `build.py` again. The builder also cleans up stale HTML in `docs/`.
 
