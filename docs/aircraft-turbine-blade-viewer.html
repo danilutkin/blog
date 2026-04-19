@@ -48,8 +48,9 @@
     const W=1200,H=820,CX=W*.45,CY=H*.54,CAMERA_Z=780,FOCAL=920;
     const lightDir=normalize([.55,-.55,1]),ambient=.28,diffuse=.72,baseColor=[142,171,220];
     const compactMode=window.matchMedia('(max-width: 900px)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+    const isiOSWebKit=/iP(ad|hone|od)/.test(navigator.userAgent) && /AppleWebKit/.test(navigator.userAgent);
     const state={rotX:-.36,rotY:.92,velX:0,velY:0,drag:false,lastX:0,lastY:0,lastT:0,wire:false,idle:0};
-    const geometry=compactMode ? buildBladeGeometry(12,8) : buildBladeGeometry(48,28); let faceNodes=[]; let needsRender=true;
+    const geometry=compactMode ? (isiOSWebKit ? buildBladeGeometry(8,6) : buildBladeGeometry(12,8)) : buildBladeGeometry(48,28); let faceNodes=[]; let needsRender=true;
     const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v)),mix=(a,b,t)=>a+(b-a)*t,smoothStep=t=>t*t*(3-2*t);
     function normalize(v){const m=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/m,v[1]/m,v[2]/m]}
     const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
@@ -114,7 +115,7 @@
         const node=faceNodes[order],rec=records[order];
         if(!rec){node.setAttribute('points','');node.setAttribute('fill','none');node.setAttribute('stroke','none');continue;}
         node.setAttribute('points',rec.points);node.setAttribute('fill',rec.fill);
-        if(state.wire){node.setAttribute('stroke','rgba(220,232,255,.43)');node.setAttribute('stroke-width','.65')}else{node.setAttribute('stroke','rgba(18,24,36,.12)');node.setAttribute('stroke-width','.35')}
+        if(state.wire){node.setAttribute('stroke','rgba(220,232,255,.43)');node.setAttribute('stroke-width','.65')}else if(compactMode){node.setAttribute('stroke','none');node.setAttribute('stroke-width','0')}else{node.setAttribute('stroke','rgba(18,24,36,.12)');node.setAttribute('stroke-width','.35')}
       }
     }
 
@@ -137,9 +138,9 @@
 
     resetBtn.addEventListener('click',()=>{state.rotX=-.36;state.rotY=.92;state.velX=0;state.velY=0;state.idle=0;needsRender=true});
     wireBtn.addEventListener('click',()=>{state.wire=!state.wire;wireBtn.textContent=`Wireframe: ${state.wire?'On':'Off'}`;needsRender=true});
-    svg.addEventListener('pointerdown',e=>{svg.setPointerCapture(e.pointerId);pointerDown(e)});
+    svg.addEventListener('pointerdown',e=>{if(svg.setPointerCapture){try{svg.setPointerCapture(e.pointerId)}catch(_){}}pointerDown(e);needsRender=true});
     svg.addEventListener('pointermove',pointerMove);svg.addEventListener('pointerup',pointerUp);svg.addEventListener('pointercancel',pointerUp);svg.addEventListener('lostpointercapture',pointerUp);
-    initFaceNodes(); animate();
+    initFaceNodes(); animate(); setTimeout(()=>{needsRender=true},120); setTimeout(()=>{needsRender=true},420);
   })();
   </script>
 </body>
