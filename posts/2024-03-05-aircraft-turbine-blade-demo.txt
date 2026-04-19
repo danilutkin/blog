@@ -1,0 +1,7 @@
+Aircraft Turbine Blade Viewer
+
+I published an interactive aircraft turbine blade demo that you can rotate directly in the browser.
+
+Open it here: [Aircraft Turbine Blade Viewer](aircraft-turbine-blade-viewer.html).
+
+The page explains how blade geometry changes from root to tip and includes a small SVG-based rendering pipeline so you can inspect the model from different angles.

@@ -636,7 +636,12 @@ def build() -> None:
 
     posts = load_posts()
 
-    keep_files = {"index.html", "about.html", "archive.html"}
+    keep_files = {
+        "index.html",
+        "about.html",
+        "archive.html",
+        "aircraft-turbine-blade-viewer.html",
+    }
 
     write_file(OUTPUT_DIR / "index.html", render_index(posts))
     write_file(OUTPUT_DIR / "about.html", render_about_page())
