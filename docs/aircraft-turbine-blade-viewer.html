@@ -49,7 +49,7 @@
     const lightDir=normalize([.55,-.55,1]),ambient=.28,diffuse=.72,baseColor=[142,171,220];
     const compactMode=window.matchMedia('(max-width: 900px)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
     const state={rotX:-.36,rotY:.92,velX:0,velY:0,drag:false,lastX:0,lastY:0,lastT:0,wire:false,idle:0};
-    const geometry=compactMode ? buildBladeGeometry(26,16) : buildBladeGeometry(48,28); let faceNodes=[];
+    const geometry=compactMode ? buildBladeGeometry(12,8) : buildBladeGeometry(48,28); let faceNodes=[]; let needsRender=true;
     const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v)),mix=(a,b,t)=>a+(b-a)*t,smoothStep=t=>t*t*(3-2*t);
     function normalize(v){const m=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/m,v[1]/m,v[2]/m]}
     const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
@@ -119,16 +119,24 @@
     }
 
     function pointerDown(e){state.drag=true;state.lastX=e.clientX;state.lastY=e.clientY;state.lastT=performance.now();state.idle=0;svg.classList.add('dragging')}
-    function pointerMove(e){if(!state.drag) return;const now=performance.now(),dx=e.clientX-state.lastX,dy=e.clientY-state.lastY,dt=Math.max(8,now-state.lastT),k=.0066;state.rotY+=dx*k;state.rotX=clamp(state.rotX+dy*k,-1.55,1.55);state.velY=dx/dt*.09;state.velX=dy/dt*.09;state.lastX=e.clientX;state.lastY=e.clientY;state.lastT=now;}
+    function pointerMove(e){if(!state.drag) return;const now=performance.now(),dx=e.clientX-state.lastX,dy=e.clientY-state.lastY,dt=Math.max(8,now-state.lastT),k=.0066;state.rotY+=dx*k;state.rotX=clamp(state.rotX+dy*k,-1.55,1.55);state.velY=dx/dt*.09;state.velX=dy/dt*.09;state.lastX=e.clientX;state.lastY=e.clientY;state.lastT=now;needsRender=true;}
     function pointerUp(){state.drag=false;svg.classList.remove('dragging')}
 
     function animate(){
-      if(!state.drag){state.rotY+=state.velY;state.rotX=clamp(state.rotX+state.velX,-1.55,1.55);state.velX*=.94;state.velY*=.94;const moving=Math.abs(state.velX)+Math.abs(state.velY);if(moving<.00025){state.idle+=1;if(state.idle>110) state.rotY+=.0022;} else state.idle=0;}
-      render(); requestAnimationFrame(animate);
+      if(!state.drag){
+        const moving=Math.abs(state.velX)+Math.abs(state.velY);
+        if(moving>.00002){
+          state.rotY+=state.velY;state.rotX=clamp(state.rotX+state.velX,-1.55,1.55);state.velX*=.94;state.velY*=.94;state.idle=0;needsRender=true;
+        }else if(!compactMode){
+          state.idle+=1;if(state.idle>110){state.rotY+=.0022;needsRender=true;}
+        }
+      }
+      if(needsRender){render();needsRender=false;}
+      requestAnimationFrame(animate);
     }
 
-    resetBtn.addEventListener('click',()=>{state.rotX=-.36;state.rotY=.92;state.velX=0;state.velY=0;state.idle=0});
-    wireBtn.addEventListener('click',()=>{state.wire=!state.wire;wireBtn.textContent=`Wireframe: ${state.wire?'On':'Off'}`});
+    resetBtn.addEventListener('click',()=>{state.rotX=-.36;state.rotY=.92;state.velX=0;state.velY=0;state.idle=0;needsRender=true});
+    wireBtn.addEventListener('click',()=>{state.wire=!state.wire;wireBtn.textContent=`Wireframe: ${state.wire?'On':'Off'}`;needsRender=true});
     svg.addEventListener('pointerdown',e=>{svg.setPointerCapture(e.pointerId);pointerDown(e)});
     svg.addEventListener('pointermove',pointerMove);svg.addEventListener('pointerup',pointerUp);svg.addEventListener('pointercancel',pointerUp);svg.addEventListener('lostpointercapture',pointerUp);
     initFaceNodes(); animate();
