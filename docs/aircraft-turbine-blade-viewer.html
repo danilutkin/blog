@@ -113,7 +113,7 @@
       for(let order=0;order<faceNodes.length;order++){
         const node=faceNodes[order],rec=records[order];
         if(!rec){node.setAttribute('points','');node.setAttribute('fill','none');node.setAttribute('stroke','none');continue;}
-        meshLayer.appendChild(node);node.setAttribute('points',rec.points);node.setAttribute('fill',rec.fill);
+        node.setAttribute('points',rec.points);node.setAttribute('fill',rec.fill);
         if(state.wire){node.setAttribute('stroke','rgba(220,232,255,.43)');node.setAttribute('stroke-width','.65')}else{node.setAttribute('stroke','rgba(18,24,36,.12)');node.setAttribute('stroke-width','.35')}
       }
     }
