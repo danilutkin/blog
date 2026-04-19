@@ -75,21 +75,47 @@
 
     function buildBladeGeometry(slices,perSide){
       const rings=[]; for(let s=0;s<=slices;s++) rings.push(bladeSection(s/slices,perSide));
-      const verts=rings.flat(),ringCount=rings[0].length,idx=(si,pi)=>si*ringCount+pi,faces=[];
+      const verts=[]; for(let i=0;i<rings.length;i++) for(let j=0;j<rings[i].length;j++) verts.push(rings[i][j]);
+      const ringCount=rings[0].length,idx=(si,pi)=>si*ringCount+pi,faces=[];
       for(let s=0;s<slices;s++) for(let p=0;p<ringCount;p++){const p2=(p+1)%ringCount,a=idx(s,p),b=idx(s+1,p),c=idx(s+1,p2),d=idx(s,p2); faces.push([a,b,c],[a,c,d]);}
       const rootCenter=verts.length,tipCenter=verts.length+1; verts.push([0,0,rings[0][0][2]],[0,0,rings[rings.length-1][0][2]]);
       for(let p=0;p<ringCount;p++){const p2=(p+1)%ringCount; faces.push([rootCenter,idx(0,p2),idx(0,p)]); faces.push([tipCenter,idx(slices,p),idx(slices,p2)]);}
       return{verts,faces};
     }
 
-    const project=p=>{const z=p[2]+CAMERA_Z,inv=FOCAL/Math.max(120,z);return[CX+p[0]*inv,CY-p[1]*inv,z]};
-    function initFaceNodes(){const frag=document.createDocumentFragment();faceNodes=geometry.faces.map(()=>{const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');poly.setAttribute('stroke-linejoin','round');frag.appendChild(poly);return poly});meshLayer.appendChild(frag)}
+    const project=p=>{
+      const z=p[2]+CAMERA_Z;
+      const denom=Math.max(1,z);
+      const inv=FOCAL/denom;
+      return[CX+p[0]*inv,CY-p[1]*inv,z];
+    };
+    const validFaces=geometry.faces.filter(f=>
+      Number.isInteger(f[0]) && Number.isInteger(f[1]) && Number.isInteger(f[2]) &&
+      f[0]>=0 && f[1]>=0 && f[2]>=0 &&
+      f[0]<geometry.verts.length && f[1]<geometry.verts.length && f[2]<geometry.verts.length
+    );
+    function initFaceNodes(){const frag=document.createDocumentFragment();faceNodes=validFaces.map(()=>{const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');poly.setAttribute('stroke-linejoin','round');frag.appendChild(poly);return poly});meshLayer.appendChild(frag)}
 
     function render(){
       const transformed=geometry.verts.map(p=>rotY(rotX(p,state.rotX),state.rotY)),projected=transformed.map(project);
-      const records=geometry.faces.map((f,i)=>{const a=transformed[f[0]],b=transformed[f[1]],c=transformed[f[2]],n=normalize(cross(sub(b,a),sub(c,a)));const intensity=clamp(ambient+diffuse*Math.max(0,n[0]*lightDir[0]+n[1]*lightDir[1]+n[2]*lightDir[2]),0,1);const shade=[Math.round(baseColor[0]*intensity),Math.round(baseColor[1]*intensity),Math.round(baseColor[2]*intensity)];return{i,depth:(projected[f[0]][2]+projected[f[1]][2]+projected[f[2]][2])/3,points:`${projected[f[0]][0].toFixed(2)},${projected[f[0]][1].toFixed(2)} ${projected[f[1]][0].toFixed(2)},${projected[f[1]][1].toFixed(2)} ${projected[f[2]][0].toFixed(2)},${projected[f[2]][1].toFixed(2)}`,fill:`rgb(${shade[0]}, ${shade[1]}, ${shade[2]})`};});
+      const records=[];
+      for(let i=0;i<validFaces.length;i++){
+        const f=validFaces[i],pa=projected[f[0]],pb=projected[f[1]],pc=projected[f[2]];
+        const isFiniteFace=Number.isFinite(pa[0])&&Number.isFinite(pa[1])&&Number.isFinite(pa[2])&&Number.isFinite(pb[0])&&Number.isFinite(pb[1])&&Number.isFinite(pb[2])&&Number.isFinite(pc[0])&&Number.isFinite(pc[1])&&Number.isFinite(pc[2]);
+        if(!isFiniteFace || pa[2]<=1 || pb[2]<=1 || pc[2]<=1) continue;
+        const a=transformed[f[0]],b=transformed[f[1]],c=transformed[f[2]],n=normalize(cross(sub(b,a),sub(c,a)));
+        const intensity=clamp(ambient+diffuse*Math.max(0,n[0]*lightDir[0]+n[1]*lightDir[1]+n[2]*lightDir[2]),0,1);
+        const shade=[Math.round(baseColor[0]*intensity),Math.round(baseColor[1]*intensity),Math.round(baseColor[2]*intensity)];
+        const points=`${pa[0].toFixed(2)},${pa[1].toFixed(2)} ${pb[0].toFixed(2)},${pb[1].toFixed(2)} ${pc[0].toFixed(2)},${pc[1].toFixed(2)}`;
+        records.push({i,depth:(pa[2]+pb[2]+pc[2])/3,points,fill:`rgb(${shade[0]}, ${shade[1]}, ${shade[2]})`});
+      }
       records.sort((A,B)=>B.depth-A.depth);
-      for(let order=0;order<records.length;order++){const rec=records[order],node=faceNodes[rec.i];meshLayer.appendChild(node);node.setAttribute('points',rec.points);node.setAttribute('fill',rec.fill);if(state.wire){node.setAttribute('stroke','rgba(220,232,255,.43)');node.setAttribute('stroke-width','.65')}else{node.setAttribute('stroke','rgba(18,24,36,.12)');node.setAttribute('stroke-width','.35')}}
+      for(let order=0;order<faceNodes.length;order++){
+        const node=faceNodes[order],rec=records[order];
+        if(!rec){node.setAttribute('points','');node.setAttribute('fill','none');node.setAttribute('stroke','none');continue;}
+        meshLayer.appendChild(node);node.setAttribute('points',rec.points);node.setAttribute('fill',rec.fill);
+        if(state.wire){node.setAttribute('stroke','rgba(220,232,255,.43)');node.setAttribute('stroke-width','.65')}else{node.setAttribute('stroke','rgba(18,24,36,.12)');node.setAttribute('stroke-width','.35')}
+      }
     }
 
     function pointerDown(e){state.drag=true;state.lastX=e.clientX;state.lastY=e.clientY;state.lastT=performance.now();state.idle=0;svg.classList.add('dragging')}
