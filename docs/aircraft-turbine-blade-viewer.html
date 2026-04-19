@@ -9,7 +9,8 @@
     *{box-sizing:border-box}
     body{margin:0;min-height:100vh;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 22% 18%,#1a2436 0%,var(--bg1) 28%,var(--bg0) 70%);display:grid;place-items:center;overflow:hidden}
     .viewer-shell{width:min(95vw,1200px);height:min(92vh,820px);border:1px solid rgba(170,195,245,.2);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.03),rgba(255,255,255,.01));position:relative;box-shadow:0 24px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07);overflow:hidden}
-    svg{width:100%;height:100%;display:block;cursor:grab;touch-action:none} svg.dragging{cursor:grabbing}
+    #viewport{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+    #viewport.dragging{cursor:grabbing}
     .hud{position:absolute;top:14px;right:14px;width:min(36vw,355px);padding:12px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--panel-border);backdrop-filter:blur(5px);box-shadow:0 14px 32px rgba(0,0,0,.35);font-size:13px;line-height:1.4;pointer-events:none}
     .hud h1{margin:0 0 8px;font-size:18px;letter-spacing:.02em;color:#eef6ff}.hud .section{margin-top:8px}.hud p{margin:5px 0;color:var(--muted)}.hud strong{color:var(--accent);font-weight:600}
     .controls{position:absolute;left:14px;bottom:14px;display:flex;align-items:center;gap:10px;background:rgba(12,18,28,.8);border:1px solid rgba(148,182,255,.27);border-radius:999px;padding:8px 12px;box-shadow:0 10px 25px rgba(0,0,0,.35);font-size:12px;color:var(--muted)}
@@ -24,7 +25,7 @@
 </head>
 <body>
   <div class="viewer-shell">
-    <svg id="viewport" viewBox="0 0 1200 820" aria-label="Interactive 3D turbine blade viewer"><g id="mesh"></g></svg>
+    <canvas id="viewport" aria-label="Interactive 3D turbine blade viewer"></canvas>
     <aside class="hud">
       <h1>Aircraft Turbine Blade</h1>
       <div class="section">
@@ -39,108 +40,322 @@
       </div>
     </aside>
     <div class="controls"><span>Drag to rotate</span><button id="resetBtn" type="button">Reset view</button><button id="wireBtn" type="button">Wireframe: Off</button></div>
-    <div class="legend-line">SVG-only manual 3D pipeline · perspective projection · depth sorting · Lambert shading</div>
+    <div class="legend-line">Canvas manual 3D pipeline · perspective projection · depth sorting · Lambert shading</div>
   </div>
 
   <script>
   (()=>{
-    const svg=document.getElementById('viewport'),meshLayer=document.getElementById('mesh'),resetBtn=document.getElementById('resetBtn'),wireBtn=document.getElementById('wireBtn');
-    const W=1200,H=820,CX=W*.45,CY=H*.54,CAMERA_Z=780,FOCAL=920;
-    const lightDir=normalize([.55,-.55,1]),ambient=.28,diffuse=.72,baseColor=[142,171,220];
+    const canvas=document.getElementById('viewport');
+    const ctx=canvas.getContext('2d',{alpha:true,antialias:true,desynchronized:false});
+    const resetBtn=document.getElementById('resetBtn');
+    const wireBtn=document.getElementById('wireBtn');
+
+    const CAMERA_Z=780;
+    const FOCAL=920;
+    const lightDir=normalize([0.55,-0.55,1]);
+    const ambient=0.28;
+    const diffuse=0.72;
+    const baseColor=[142,171,220];
+
     const compactMode=window.matchMedia('(max-width: 900px)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
     const isiOSWebKit=/iP(ad|hone|od)/.test(navigator.userAgent) && /AppleWebKit/.test(navigator.userAgent);
-    const state={rotX:-.36,rotY:.92,velX:0,velY:0,drag:false,lastX:0,lastY:0,lastT:0,wire:false,idle:0};
-    const geometry=compactMode ? (isiOSWebKit ? buildBladeGeometry(8,6) : buildBladeGeometry(12,8)) : buildBladeGeometry(48,28); let faceNodes=[]; let needsRender=true;
-    const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v)),mix=(a,b,t)=>a+(b-a)*t,smoothStep=t=>t*t*(3-2*t);
-    function normalize(v){const m=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/m,v[1]/m,v[2]/m]}
-    const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
+    const geometry=compactMode ? (isiOSWebKit ? buildBladeGeometry(12,8) : buildBladeGeometry(20,12)) : buildBladeGeometry(48,28);
+
+    const state={rotX:-0.36,rotY:0.92,velX:0,velY:0,drag:false,lastX:0,lastY:0,lastT:0,wire:false,idle:0};
+    let needsRender=true;
+
+    const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+    const mix=(a,b,t)=>a+(b-a)*t;
+    const smoothStep=t=>t*t*(3-2*t);
+
+    function normalize(v){
+      const m=Math.hypot(v[0],v[1],v[2])||1;
+      return[v[0]/m,v[1]/m,v[2]/m];
+    }
+
+    const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+    const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
     const rotX=(p,a)=>{const c=Math.cos(a),s=Math.sin(a);return[p[0],c*p[1]-s*p[2],s*p[1]+c*p[2]]};
     const rotY=(p,a)=>{const c=Math.cos(a),s=Math.sin(a);return[c*p[0]+s*p[2],p[1],-s*p[0]+c*p[2]]};
     const rotate2D=(x,y,a)=>{const c=Math.cos(a),s=Math.sin(a);return[x*c-y*s,x*s+y*c]};
 
-    // Airfoil-like section using a NACA-style thickness term plus camber.
     function airfoilPoint(t){
-      const x=t,thickness=.14;
+      const x=t;
+      const thickness=0.14;
       const yt=5*thickness*(0.2969*Math.sqrt(x)-0.1260*x-0.3516*x*x+0.2843*x*x*x-0.1015*x*x*x*x);
-      const yc=.035*Math.sin(Math.PI*x);
-      return{x:x-.42,yTop:yc+yt,yBot:yc-yt};
+      const yc=0.035*Math.sin(Math.PI*x);
+      return{x:x-0.42,yTop:yc+yt,yBot:yc-yt};
     }
 
     function bladeSection(s,count){
       const points=[];
-      for(let i=0;i<count;i++){const t=i/(count-1),p=airfoilPoint(t);points.push([p.x,p.yTop])}
-      for(let i=count-2;i>0;i--){const t=i/(count-1),p=airfoilPoint(t);points.push([p.x,p.yBot])}
-      const ss=smoothStep(s),chord=mix(210,112,ss),thickScale=mix(1.2,.62,ss),twist=mix(-.16,1.08,ss),bow=22*Math.sin(Math.PI*s)-7*s*s,lean=mix(-14,26,ss),zPos=mix(-245,245,s);
-      return points.map(([x,y])=>{const px=x*chord,py=y*chord*thickScale,[rx,ry]=rotate2D(px,py,twist);return[rx+bow,ry+lean,zPos]});
+      for(let i=0;i<count;i++){
+        const t=i/(count-1);
+        const p=airfoilPoint(t);
+        points.push([p.x,p.yTop]);
+      }
+      for(let i=count-2;i>0;i--){
+        const t=i/(count-1);
+        const p=airfoilPoint(t);
+        points.push([p.x,p.yBot]);
+      }
+
+      const ss=smoothStep(s);
+      const chord=mix(210,112,ss);
+      const thickScale=mix(1.2,0.62,ss);
+      const twist=mix(-0.16,1.08,ss);
+      const bow=22*Math.sin(Math.PI*s)-7*s*s;
+      const lean=mix(-14,26,ss);
+      const zPos=mix(-245,245,s);
+
+      return points.map(([x,y])=>{
+        const px=x*chord;
+        const py=y*chord*thickScale;
+        const [rx,ry]=rotate2D(px,py,twist);
+        return[rx+bow,ry+lean,zPos];
+      });
     }
 
     function buildBladeGeometry(slices,perSide){
-      const rings=[]; for(let s=0;s<=slices;s++) rings.push(bladeSection(s/slices,perSide));
-      const verts=[]; for(let i=0;i<rings.length;i++) for(let j=0;j<rings[i].length;j++) verts.push(rings[i][j]);
-      const ringCount=rings[0].length,idx=(si,pi)=>si*ringCount+pi,faces=[];
-      for(let s=0;s<slices;s++) for(let p=0;p<ringCount;p++){const p2=(p+1)%ringCount,a=idx(s,p),b=idx(s+1,p),c=idx(s+1,p2),d=idx(s,p2); faces.push([a,b,c],[a,c,d]);}
-      const rootCenter=verts.length,tipCenter=verts.length+1; verts.push([0,0,rings[0][0][2]],[0,0,rings[rings.length-1][0][2]]);
-      for(let p=0;p<ringCount;p++){const p2=(p+1)%ringCount; faces.push([rootCenter,idx(0,p2),idx(0,p)]); faces.push([tipCenter,idx(slices,p),idx(slices,p2)]);}
+      const rings=[];
+      for(let s=0;s<=slices;s++) rings.push(bladeSection(s/slices,perSide));
+
+      const verts=[];
+      for(let i=0;i<rings.length;i++){
+        for(let j=0;j<rings[i].length;j++){
+          verts.push(rings[i][j]);
+        }
+      }
+
+      const ringCount=rings[0].length;
+      const idx=(si,pi)=>si*ringCount+pi;
+      const faces=[];
+
+      for(let s=0;s<slices;s++){
+        for(let p=0;p<ringCount;p++){
+          const p2=(p+1)%ringCount;
+          const a=idx(s,p);
+          const b=idx(s+1,p);
+          const c=idx(s+1,p2);
+          const d=idx(s,p2);
+          faces.push([a,b,c],[a,c,d]);
+        }
+      }
+
+      const rootCenter=verts.length;
+      const tipCenter=verts.length+1;
+      verts.push([0,0,rings[0][0][2]],[0,0,rings[rings.length-1][0][2]]);
+
+      for(let p=0;p<ringCount;p++){
+        const p2=(p+1)%ringCount;
+        faces.push([rootCenter,idx(0,p2),idx(0,p)]);
+        faces.push([tipCenter,idx(slices,p),idx(slices,p2)]);
+      }
+
       return{verts,faces};
     }
 
-    const project=p=>{
-      const z=p[2]+CAMERA_Z;
-      const denom=Math.max(1,z);
-      const inv=FOCAL/denom;
-      return[CX+p[0]*inv,CY-p[1]*inv,z];
-    };
-    const validFaces=geometry.faces.filter(f=>
-      Number.isInteger(f[0]) && Number.isInteger(f[1]) && Number.isInteger(f[2]) &&
-      f[0]>=0 && f[1]>=0 && f[2]>=0 &&
-      f[0]<geometry.verts.length && f[1]<geometry.verts.length && f[2]<geometry.verts.length
-    );
-    function initFaceNodes(){const frag=document.createDocumentFragment();faceNodes=validFaces.map(()=>{const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');poly.setAttribute('stroke-linejoin','round');frag.appendChild(poly);return poly});meshLayer.appendChild(frag)}
-
-    function render(){
-      const transformed=geometry.verts.map(p=>rotY(rotX(p,state.rotX),state.rotY)),projected=transformed.map(project);
-      const records=[];
-      for(let i=0;i<validFaces.length;i++){
-        const f=validFaces[i],pa=projected[f[0]],pb=projected[f[1]],pc=projected[f[2]];
-        const isFiniteFace=Number.isFinite(pa[0])&&Number.isFinite(pa[1])&&Number.isFinite(pa[2])&&Number.isFinite(pb[0])&&Number.isFinite(pb[1])&&Number.isFinite(pb[2])&&Number.isFinite(pc[0])&&Number.isFinite(pc[1])&&Number.isFinite(pc[2]);
-        if(!isFiniteFace || pa[2]<=1 || pb[2]<=1 || pc[2]<=1) continue;
-        const a=transformed[f[0]],b=transformed[f[1]],c=transformed[f[2]],n=normalize(cross(sub(b,a),sub(c,a)));
-        const intensity=clamp(ambient+diffuse*Math.max(0,n[0]*lightDir[0]+n[1]*lightDir[1]+n[2]*lightDir[2]),0,1);
-        const shade=[Math.round(baseColor[0]*intensity),Math.round(baseColor[1]*intensity),Math.round(baseColor[2]*intensity)];
-        const points=`${pa[0].toFixed(2)},${pa[1].toFixed(2)} ${pb[0].toFixed(2)},${pb[1].toFixed(2)} ${pc[0].toFixed(2)},${pc[1].toFixed(2)}`;
-        records.push({i,depth:(pa[2]+pb[2]+pc[2])/3,points,fill:`rgb(${shade[0]}, ${shade[1]}, ${shade[2]})`});
-      }
-      records.sort((A,B)=>B.depth-A.depth);
-      for(let order=0;order<faceNodes.length;order++){
-        const node=faceNodes[order],rec=records[order];
-        if(!rec){node.setAttribute('points','');node.setAttribute('fill','none');node.setAttribute('stroke','none');continue;}
-        node.setAttribute('points',rec.points);node.setAttribute('fill',rec.fill);
-        if(state.wire){node.setAttribute('stroke','rgba(220,232,255,.43)');node.setAttribute('stroke-width','.65')}else if(compactMode){node.setAttribute('stroke','none');node.setAttribute('stroke-width','0')}else{node.setAttribute('stroke','rgba(18,24,36,.12)');node.setAttribute('stroke-width','.35')}
+    function resizeCanvas(){
+      const rect=canvas.getBoundingClientRect();
+      const dpr=Math.min(3,window.devicePixelRatio||1);
+      const width=Math.max(1,Math.round(rect.width*dpr));
+      const height=Math.max(1,Math.round(rect.height*dpr));
+      if(canvas.width!==width || canvas.height!==height){
+        canvas.width=width;
+        canvas.height=height;
+        needsRender=true;
       }
     }
 
-    function pointerDown(e){state.drag=true;state.lastX=e.clientX;state.lastY=e.clientY;state.lastT=performance.now();state.idle=0;svg.classList.add('dragging')}
-    function pointerMove(e){if(!state.drag) return;const now=performance.now(),dx=e.clientX-state.lastX,dy=e.clientY-state.lastY,dt=Math.max(8,now-state.lastT),k=.0066;state.rotY+=dx*k;state.rotX=clamp(state.rotX+dy*k,-1.55,1.55);state.velY=dx/dt*.09;state.velX=dy/dt*.09;state.lastX=e.clientX;state.lastY=e.clientY;state.lastT=now;needsRender=true;}
-    function pointerUp(){state.drag=false;svg.classList.remove('dragging')}
+    function projectPoint(p,width,height){
+      const z=p[2]+CAMERA_Z;
+      if(z<=1) return null;
+      const inv=FOCAL/z;
+      const cx=width*0.45;
+      const cy=height*0.54;
+      return[cx+p[0]*inv,cy-p[1]*inv,z];
+    }
+
+    function render(){
+      const width=canvas.width;
+      const height=canvas.height;
+      if(width<2 || height<2) return;
+
+      ctx.clearRect(0,0,width,height);
+
+      const transformed=geometry.verts.map(p=>rotY(rotX(p,state.rotX),state.rotY));
+      const projected=transformed.map(p=>projectPoint(p,width,height));
+      const records=[];
+
+      for(let i=0;i<geometry.faces.length;i++){
+        const f=geometry.faces[i];
+        const pa=projected[f[0]];
+        const pb=projected[f[1]];
+        const pc=projected[f[2]];
+        if(!pa || !pb || !pc) continue;
+
+        const a=transformed[f[0]],b=transformed[f[1]],c=transformed[f[2]];
+        const n=normalize(cross(sub(b,a),sub(c,a)));
+        const light=clamp(ambient+diffuse*Math.max(0,n[0]*lightDir[0]+n[1]*lightDir[1]+n[2]*lightDir[2]),0,1);
+        const shade=[Math.round(baseColor[0]*light),Math.round(baseColor[1]*light),Math.round(baseColor[2]*light)];
+
+        records.push({
+          depth:(pa[2]+pb[2]+pc[2])/3,
+          points:[pa,pb,pc],
+          fill:`rgb(${shade[0]}, ${shade[1]}, ${shade[2]})`
+        });
+      }
+
+      records.sort((a,b)=>b.depth-a.depth);
+
+      if(state.wire){
+        ctx.lineWidth=Math.max(1,canvas.width/1600);
+        ctx.strokeStyle='rgba(220,232,255,.48)';
+      }
+
+      for(let i=0;i<records.length;i++){
+        const face=records[i];
+        ctx.beginPath();
+        ctx.moveTo(face.points[0][0],face.points[0][1]);
+        ctx.lineTo(face.points[1][0],face.points[1][1]);
+        ctx.lineTo(face.points[2][0],face.points[2][1]);
+        ctx.closePath();
+
+        ctx.fillStyle=face.fill;
+        ctx.fill();
+
+        if(state.wire){
+          ctx.stroke();
+        }else if(!compactMode){
+          ctx.strokeStyle='rgba(18,24,36,.16)';
+          ctx.lineWidth=Math.max(0.6,canvas.width/3600);
+          ctx.stroke();
+        }
+      }
+    }
+
+    function pointerDown(clientX,clientY){
+      state.drag=true;
+      state.lastX=clientX;
+      state.lastY=clientY;
+      state.lastT=performance.now();
+      state.idle=0;
+      canvas.classList.add('dragging');
+    }
+
+    function pointerMove(clientX,clientY){
+      if(!state.drag) return;
+      const now=performance.now();
+      const dx=clientX-state.lastX;
+      const dy=clientY-state.lastY;
+      const dt=Math.max(8,now-state.lastT);
+      const k=0.0066;
+
+      state.rotY+=dx*k;
+      state.rotX=clamp(state.rotX+dy*k,-1.55,1.55);
+      state.velY=dx/dt*0.09;
+      state.velX=dy/dt*0.09;
+      state.lastX=clientX;
+      state.lastY=clientY;
+      state.lastT=now;
+      needsRender=true;
+    }
+
+    function pointerUp(){
+      state.drag=false;
+      canvas.classList.remove('dragging');
+    }
 
     function animate(){
       if(!state.drag){
         const moving=Math.abs(state.velX)+Math.abs(state.velY);
-        if(moving>.00002){
-          state.rotY+=state.velY;state.rotX=clamp(state.rotX+state.velX,-1.55,1.55);state.velX*=.94;state.velY*=.94;state.idle=0;needsRender=true;
+        if(moving>0.00002){
+          state.rotY+=state.velY;
+          state.rotX=clamp(state.rotX+state.velX,-1.55,1.55);
+          state.velX*=0.94;
+          state.velY*=0.94;
+          state.idle=0;
+          needsRender=true;
         }else if(!compactMode){
-          state.idle+=1;if(state.idle>110){state.rotY+=.0022;needsRender=true;}
+          state.idle+=1;
+          if(state.idle>110){
+            state.rotY+=0.0022;
+            needsRender=true;
+          }
         }
       }
-      if(needsRender){render();needsRender=false;}
+
+      if(needsRender){
+        render();
+        needsRender=false;
+      }
+
       requestAnimationFrame(animate);
     }
 
-    resetBtn.addEventListener('click',()=>{state.rotX=-.36;state.rotY=.92;state.velX=0;state.velY=0;state.idle=0;needsRender=true});
-    wireBtn.addEventListener('click',()=>{state.wire=!state.wire;wireBtn.textContent=`Wireframe: ${state.wire?'On':'Off'}`;needsRender=true});
-    svg.addEventListener('pointerdown',e=>{if(svg.setPointerCapture){try{svg.setPointerCapture(e.pointerId)}catch(_){}}pointerDown(e);needsRender=true});
-    svg.addEventListener('pointermove',pointerMove);svg.addEventListener('pointerup',pointerUp);svg.addEventListener('pointercancel',pointerUp);svg.addEventListener('lostpointercapture',pointerUp);
-    initFaceNodes(); animate(); setTimeout(()=>{needsRender=true},120); setTimeout(()=>{needsRender=true},420);
+    function installInputHandlers(){
+      if('PointerEvent' in window){
+        canvas.addEventListener('pointerdown',(e)=>{
+          if(canvas.setPointerCapture){
+            try{canvas.setPointerCapture(e.pointerId);}catch(_){/* noop */}
+          }
+          pointerDown(e.clientX,e.clientY);
+          needsRender=true;
+        });
+        canvas.addEventListener('pointermove',(e)=>pointerMove(e.clientX,e.clientY));
+        canvas.addEventListener('pointerup',pointerUp);
+        canvas.addEventListener('pointercancel',pointerUp);
+        canvas.addEventListener('lostpointercapture',pointerUp);
+        return;
+      }
+
+      canvas.addEventListener('mousedown',(e)=>{pointerDown(e.clientX,e.clientY);needsRender=true;});
+      window.addEventListener('mousemove',(e)=>pointerMove(e.clientX,e.clientY));
+      window.addEventListener('mouseup',pointerUp);
+
+      canvas.addEventListener('touchstart',(e)=>{
+        const t=e.changedTouches[0];
+        if(!t) return;
+        e.preventDefault();
+        pointerDown(t.clientX,t.clientY);
+        needsRender=true;
+      },{passive:false});
+
+      canvas.addEventListener('touchmove',(e)=>{
+        const t=e.changedTouches[0];
+        if(!t) return;
+        e.preventDefault();
+        pointerMove(t.clientX,t.clientY);
+      },{passive:false});
+
+      canvas.addEventListener('touchend',pointerUp);
+      canvas.addEventListener('touchcancel',pointerUp);
+    }
+
+    resetBtn.addEventListener('click',()=>{
+      state.rotX=-0.36;
+      state.rotY=0.92;
+      state.velX=0;
+      state.velY=0;
+      state.idle=0;
+      needsRender=true;
+    });
+
+    wireBtn.addEventListener('click',()=>{
+      state.wire=!state.wire;
+      wireBtn.textContent=`Wireframe: ${state.wire?'On':'Off'}`;
+      needsRender=true;
+    });
+
+    installInputHandlers();
+    resizeCanvas();
+    animate();
+
+    window.addEventListener('resize',resizeCanvas,{passive:true});
+    window.addEventListener('orientationchange',()=>{setTimeout(resizeCanvas,120);});
+
+    setTimeout(()=>{needsRender=true;},120);
+    setTimeout(()=>{needsRender=true;},420);
   })();
   </script>
 </body>
