@@ -10,11 +10,16 @@
     body{margin:0;min-height:100vh;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 22% 18%,#1a2436 0%,var(--bg1) 28%,var(--bg0) 70%);display:grid;place-items:center;overflow:hidden}
     .viewer-shell{width:min(95vw,1200px);height:min(92vh,820px);border:1px solid rgba(170,195,245,.2);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.03),rgba(255,255,255,.01));position:relative;box-shadow:0 24px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07);overflow:hidden}
     svg{width:100%;height:100%;display:block;cursor:grab;touch-action:none} svg.dragging{cursor:grabbing}
-    .hud{position:absolute;top:14px;right:14px;width:min(35vw,355px);padding:12px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--panel-border);backdrop-filter:blur(5px);box-shadow:0 14px 32px rgba(0,0,0,.35);font-size:13px;line-height:1.4;pointer-events:none}
+    .hud{position:absolute;top:14px;right:14px;width:min(36vw,355px);padding:12px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--panel-border);backdrop-filter:blur(5px);box-shadow:0 14px 32px rgba(0,0,0,.35);font-size:13px;line-height:1.4;pointer-events:none}
     .hud h1{margin:0 0 8px;font-size:18px;letter-spacing:.02em;color:#eef6ff}.hud .section{margin-top:8px}.hud p{margin:5px 0;color:var(--muted)}.hud strong{color:var(--accent);font-weight:600}
     .controls{position:absolute;left:14px;bottom:14px;display:flex;align-items:center;gap:10px;background:rgba(12,18,28,.8);border:1px solid rgba(148,182,255,.27);border-radius:999px;padding:8px 12px;box-shadow:0 10px 25px rgba(0,0,0,.35);font-size:12px;color:var(--muted)}
     button{border:1px solid rgba(146,184,255,.4);background:rgba(91,133,218,.16);color:#deebff;padding:5px 10px;border-radius:999px;font-size:12px;cursor:pointer}
     .legend-line{position:absolute;inset:auto 0 58px;text-align:center;font-size:12px;color:#8fa2c8;letter-spacing:.02em;pointer-events:none}
+    @media (max-width: 860px){
+      .hud{left:12px;right:12px;top:12px;width:auto;max-height:44%;overflow:auto}
+      .controls{left:10px;right:10px;bottom:10px;justify-content:center;flex-wrap:wrap;border-radius:16px}
+      .legend-line{inset:auto 8px 76px;font-size:11px}
+    }
   </style>
 </head>
 <body>
@@ -40,10 +45,11 @@
   <script>
   (()=>{
     const svg=document.getElementById('viewport'),meshLayer=document.getElementById('mesh'),resetBtn=document.getElementById('resetBtn'),wireBtn=document.getElementById('wireBtn');
-    const W=1200,H=820,CX=W*.5,CY=H*.54,CAMERA_Z=780,FOCAL=920;
+    const W=1200,H=820,CX=W*.45,CY=H*.54,CAMERA_Z=780,FOCAL=920;
     const lightDir=normalize([.55,-.55,1]),ambient=.28,diffuse=.72,baseColor=[142,171,220];
-    const state={rotX:-.55,rotY:.65,velX:0,velY:0,drag:false,lastX:0,lastY:0,lastT:0,wire:false,idle:0};
-    const geometry=buildBladeGeometry(48,28); let faceNodes=[];
+    const compactMode=window.matchMedia('(max-width: 900px)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+    const state={rotX:-.36,rotY:.92,velX:0,velY:0,drag:false,lastX:0,lastY:0,lastT:0,wire:false,idle:0};
+    const geometry=compactMode ? buildBladeGeometry(26,16) : buildBladeGeometry(48,28); let faceNodes=[];
     const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v)),mix=(a,b,t)=>a+(b-a)*t,smoothStep=t=>t*t*(3-2*t);
     function normalize(v){const m=Math.hypot(v[0],v[1],v[2])||1;return[v[0]/m,v[1]/m,v[2]/m]}
     const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
@@ -95,7 +101,7 @@
       render(); requestAnimationFrame(animate);
     }
 
-    resetBtn.addEventListener('click',()=>{state.rotX=-.55;state.rotY=.65;state.velX=0;state.velY=0;state.idle=0});
+    resetBtn.addEventListener('click',()=>{state.rotX=-.36;state.rotY=.92;state.velX=0;state.velY=0;state.idle=0});
     wireBtn.addEventListener('click',()=>{state.wire=!state.wire;wireBtn.textContent=`Wireframe: ${state.wire?'On':'Off'}`});
     svg.addEventListener('pointerdown',e=>{svg.setPointerCapture(e.pointerId);pointerDown(e)});
     svg.addEventListener('pointermove',pointerMove);svg.addEventListener('pointerup',pointerUp);svg.addEventListener('pointercancel',pointerUp);svg.addEventListener('lostpointercapture',pointerUp);
