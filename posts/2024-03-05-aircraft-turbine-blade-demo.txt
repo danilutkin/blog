@@ -4,4 +4,4 @@ I published an interactive aircraft turbine blade demo that you can rotate direc
 
 Open it here: [Aircraft Turbine Blade Viewer](aircraft-turbine-blade-viewer.html).
 
-The page explains how blade geometry changes from root to tip and includes a small SVG-based rendering pipeline so you can inspect the model from different angles.
+The page explains how blade geometry changes from root to tip and now uses a lightweight Three.js WebGL viewer with cooling and thermal overlays.

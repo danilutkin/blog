@@ -5,358 +5,1019 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Aircraft Turbine Blade</title>
   <style>
-    :root { --bg0:#0b0e14; --bg1:#111723; --panel:rgba(18,24,36,.84); --panel-border:rgba(190,210,255,.25); --text:#d8e2f2; --muted:#9aa8c3; --accent:#80d5ff; }
+    :root{
+      --bg0:#0b0d0c;
+      --bg1:#171716;
+      --panel:rgba(15,17,16,.84);
+      --panel-border:rgba(207,218,213,.22);
+      --text:#e4ebe6;
+      --muted:#a7b2ad;
+      --accent:#68d7df;
+      --heat:#ff8b3d;
+    }
     *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 22% 18%,#1a2436 0%,var(--bg1) 28%,var(--bg0) 70%);display:grid;place-items:center;overflow:hidden}
-    .viewer-shell{width:min(95vw,1200px);height:min(92vh,820px);border:1px solid rgba(170,195,245,.2);border-radius:18px;background:linear-gradient(160deg,rgba(255,255,255,.03),rgba(255,255,255,.01));position:relative;box-shadow:0 24px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07);overflow:hidden}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden}
+    body{
+      font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      color:var(--text);
+      background:linear-gradient(135deg,var(--bg0) 0%,#111311 45%,var(--bg1) 100%);
+    }
+    .viewer-shell{position:fixed;inset:0;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0))}
     #viewport{width:100%;height:100%;display:block;cursor:grab;touch-action:none}
     #viewport.dragging{cursor:grabbing}
-    .hud{position:absolute;top:14px;right:14px;width:min(36vw,355px);padding:12px 14px;border-radius:12px;background:var(--panel);border:1px solid var(--panel-border);backdrop-filter:blur(5px);box-shadow:0 14px 32px rgba(0,0,0,.35);font-size:13px;line-height:1.4;pointer-events:none}
-    .hud h1{margin:0 0 8px;font-size:18px;letter-spacing:.02em;color:#eef6ff}.hud .section{margin-top:8px}.hud p{margin:5px 0;color:var(--muted)}.hud strong{color:var(--accent);font-weight:600}
-    .controls{position:absolute;left:14px;bottom:14px;display:flex;align-items:center;gap:10px;background:rgba(12,18,28,.8);border:1px solid rgba(148,182,255,.27);border-radius:999px;padding:8px 12px;box-shadow:0 10px 25px rgba(0,0,0,.35);font-size:12px;color:var(--muted)}
-    button{border:1px solid rgba(146,184,255,.4);background:rgba(91,133,218,.16);color:#deebff;padding:5px 10px;border-radius:999px;font-size:12px;cursor:pointer}
-    .legend-line{position:absolute;inset:auto 0 58px;text-align:center;font-size:12px;color:#8fa2c8;letter-spacing:.02em;pointer-events:none}
-    @media (max-width: 860px){
-      .hud{left:12px;right:12px;top:12px;width:auto;max-height:44%;overflow:auto}
-      .controls{left:10px;right:10px;bottom:10px;justify-content:center;flex-wrap:wrap;border-radius:16px}
-      .legend-line{inset:auto 8px 76px;font-size:11px}
+    .hud{
+      position:absolute;
+      top:16px;
+      right:16px;
+      width:min(360px,calc(100vw - 32px));
+      padding:14px 16px;
+      border:1px solid var(--panel-border);
+      border-radius:8px;
+      background:var(--panel);
+      box-shadow:0 18px 42px rgba(0,0,0,.34);
+      backdrop-filter:blur(7px);
+      font-size:13px;
+      line-height:1.42;
+      pointer-events:none;
+    }
+    .hud h1{margin:0 0 8px;font-size:18px;letter-spacing:0;color:#f3f7f4}
+    .hud p{margin:6px 0;color:var(--muted)}
+    .hud strong{color:var(--accent);font-weight:650}
+    .hud .thermal{color:var(--heat)}
+    .controls{
+      position:absolute;
+      left:16px;
+      bottom:16px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      max-width:calc(100vw - 32px);
+      flex-wrap:wrap;
+      padding:10px;
+      border:1px solid rgba(207,218,213,.22);
+      border-radius:8px;
+      background:rgba(12,14,13,.84);
+      box-shadow:0 16px 34px rgba(0,0,0,.36);
+    }
+    button{
+      min-height:34px;
+      border:1px solid rgba(176,195,188,.34);
+      border-radius:6px;
+      background:rgba(235,241,237,.08);
+      color:#edf6f1;
+      padding:7px 10px;
+      font-size:12px;
+      line-height:1;
+      cursor:pointer;
+    }
+    button[aria-pressed="true"]{border-color:rgba(104,215,223,.8);background:rgba(104,215,223,.16);color:#f7ffff}
+    button:disabled{opacity:.48;cursor:not-allowed}
+    .detail-picker{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      color:#b7c2bd;
+      font-size:12px;
+    }
+    select{
+      min-height:34px;
+      max-width:min(54vw,220px);
+      border:1px solid rgba(176,195,188,.34);
+      border-radius:6px;
+      background:#151917;
+      color:#edf6f1;
+      padding:6px 28px 6px 9px;
+      font:inherit;
+    }
+    .status{
+      position:absolute;
+      left:16px;
+      top:16px;
+      width:min(340px,calc(100vw - 32px));
+      padding:10px 12px;
+      border:1px solid rgba(207,218,213,.18);
+      border-radius:8px;
+      background:rgba(12,14,13,.62);
+      color:#b7c2bd;
+      font-size:12px;
+      line-height:1.45;
+      pointer-events:none;
+    }
+    .status strong{color:#edf6f1;font-weight:650}
+    .fallback{
+      position:absolute;
+      inset:0;
+      display:none;
+      place-items:center;
+      padding:24px;
+      color:#e9f0eb;
+      background:#101211;
+      text-align:center;
+      font-size:15px;
+      line-height:1.5;
+    }
+    .fallback.visible{display:grid}
+    @media (max-width: 760px){
+      .hud{top:12px;right:12px;left:12px;width:auto;max-height:38vh;overflow:auto;font-size:12px}
+      .status{top:auto;bottom:96px;left:12px;right:12px;width:auto}
+      .controls{left:12px;right:12px;bottom:12px;justify-content:center}
+      button{flex:1 1 auto;min-width:118px}
+      .detail-picker{flex:1 1 100%;justify-content:center}
+      select{max-width:100%;flex:1}
     }
   </style>
 </head>
 <body>
-  <div class="viewer-shell">
-    <canvas id="viewport" aria-label="Interactive 3D turbine blade viewer"></canvas>
+  <main class="viewer-shell">
+    <canvas id="viewport" aria-label="Interactive WebGL high-pressure turbine blade viewer"></canvas>
     <aside class="hud">
-      <h1>Aircraft Turbine Blade</h1>
-      <div class="section">
-        <p>• A swept, twisted <strong>airfoil blade</strong> that extracts or adds energy to compressible flow.</p>
-        <p>• Root geometry is wider and thicker to carry load into the disk and hub.</p>
-        <p>• Tip sections are thinner and narrower to reduce drag and secondary losses.</p>
-      </div>
-      <div class="section">
-        <p>• Operates under <strong>extreme temperature</strong>, pressure, and cyclic rotational stress.</p>
-        <p>• Efficiency depends on micron-scale aerodynamic precision across the full span.</p>
-        <p>• Built from advanced superalloys and high-control manufacturing processes.</p>
-      </div>
+      <h1 id="detailTitle">High-Pressure Turbine Blade</h1>
+      <p id="detailLineA">A twisted HPT airfoil with <strong>platform</strong> and simplified <strong>fir-tree root</strong>.</p>
+      <p id="detailLineB">Internal serpentine cooling uses three passes with U-turns from root to tip.</p>
+      <p id="detailLineC"><span class="thermal">Thermal mode</span> emphasizes hotter leading-edge and tip regions while channels remain cool.</p>
     </aside>
-    <div class="controls"><span>Drag to rotate</span><button id="resetBtn" type="button">Reset view</button><button id="wireBtn" type="button">Wireframe: Off</button></div>
-    <div class="legend-line">Canvas manual 3D pipeline · perspective projection · depth sorting · Lambert shading</div>
-  </div>
+    <div class="status">
+      <strong>Drag</strong> to orbit. <strong>Pinch</strong> or scroll to zoom. The model rotates automatically until you interact.
+    </div>
+    <nav class="controls" aria-label="Viewer controls">
+      <label class="detail-picker" for="detailSelect">Part
+        <select id="detailSelect">
+          <option value="hpt">Cooled HPT blade</option>
+          <option value="shrouded">Long shrouded blade</option>
+        </select>
+      </label>
+      <button id="coolingBtn" type="button" aria-pressed="false">Show internal cooling</button>
+      <button id="thermalBtn" type="button" aria-pressed="false">Thermal mode</button>
+      <button id="rotateBtn" type="button" aria-pressed="true">Rotation: On</button>
+      <button id="resetBtn" type="button">Reset view</button>
+    </nav>
+    <div id="fallback" class="fallback">
+      WebGL is not available in this browser. Use a WebGL-capable browser to view the turbine blade.
+    </div>
+  </main>
 
-  <script>
-  (()=>{
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+
     const canvas=document.getElementById('viewport');
-    const ctx=canvas.getContext('2d',{alpha:true,antialias:true,desynchronized:false});
+    const detailSelect=document.getElementById('detailSelect');
+    const detailTitle=document.getElementById('detailTitle');
+    const detailLineA=document.getElementById('detailLineA');
+    const detailLineB=document.getElementById('detailLineB');
+    const detailLineC=document.getElementById('detailLineC');
+    const coolingBtn=document.getElementById('coolingBtn');
+    const thermalBtn=document.getElementById('thermalBtn');
+    const rotateBtn=document.getElementById('rotateBtn');
     const resetBtn=document.getElementById('resetBtn');
-    const wireBtn=document.getElementById('wireBtn');
+    const fallback=document.getElementById('fallback');
 
-    const CAMERA_Z=780;
-    const FOCAL=920;
-    const lightDir=normalize([0.55,-0.55,1]);
-    const ambient=0.28;
-    const diffuse=0.72;
-    const baseColor=[142,171,220];
+    const compactMode=window.matchMedia('(max-width: 760px)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
+    const bladeHeight=3.55;
+    const shroudedBladeHeight=3.95;
+    const platformTop=0.02;
+    const clock=new THREE.Clock();
+    const scratchColor=new THREE.Color();
 
-    const compactMode=window.matchMedia('(max-width: 900px)').matches || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
-    const isiOSWebKit=/iP(ad|hone|od)/.test(navigator.userAgent) && /AppleWebKit/.test(navigator.userAgent);
-    const geometry=compactMode ? (isiOSWebKit ? buildBladeGeometry(12,8) : buildBladeGeometry(20,12)) : buildBladeGeometry(48,28);
+    let renderer;
+    try{
+      renderer=new THREE.WebGLRenderer({
+        canvas,
+        antialias:!compactMode,
+        alpha:true,
+        powerPreference:'high-performance'
+      });
+    }catch(error){
+      fallback.classList.add('visible');
+      throw error;
+    }
 
-    const state={rotX:-0.36,rotY:0.92,velX:0,velY:0,drag:false,lastX:0,lastY:0,lastT:0,wire:false,idle:0};
-    let needsRender=true;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1,compactMode ? 1.5 : 2));
+    renderer.outputColorSpace=THREE.SRGBColorSpace;
 
-    function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+    const scene=new THREE.Scene();
+    scene.name='Turbine_Blade_Engineering_Viewer';
+
+    const camera=new THREE.PerspectiveCamera(38,1,0.1,100);
+    camera.name='Orbit_Camera';
+
+    const assembly=new THREE.Group();
+    assembly.name='Turbine_Blade_Detail_List';
+    scene.add(assembly);
+
+    const detailModels=new Map();
+    const hptDetail=new THREE.Group();
+    hptDetail.name='Cooled_HPT_Blade_Detail';
+    assembly.add(hptDetail);
+
+    const ambientLight=new THREE.AmbientLight(0xdfe8e2,0.82);
+    ambientLight.name='Ambient_Engineering_Light';
+    scene.add(ambientLight);
+
+    const keyLight=new THREE.DirectionalLight(0xffffff,2.85);
+    keyLight.name='Directional_Key_Light';
+    keyLight.position.set(3.6,5.4,5.6);
+    scene.add(keyLight);
+
+    const rimLight=new THREE.DirectionalLight(0x8edce0,0.42);
+    rimLight.name='Cool_Rim_Light';
+    rimLight.position.set(-3.8,2.8,-3.2);
+    scene.add(rimLight);
+
+    const bladeGeometry=createBladeGeometry(compactMode ? 40 : 56,compactMode ? 22 : 32);
+    const bladeMaterial=new THREE.MeshStandardMaterial({
+      name:'Nickel_Superalloy_Vertex_Gradient',
+      color:0xffffff,
+      vertexColors:true,
+      metalness:0.88,
+      roughness:0.34,
+      transparent:true,
+      opacity:1,
+      depthWrite:true
+    });
+    const bladeMesh=new THREE.Mesh(bladeGeometry,bladeMaterial);
+    bladeMesh.name='Airfoil_Blade';
+    hptDetail.add(bladeMesh);
+
+    const platformMaterial=new THREE.MeshStandardMaterial({
+      name:'Shot_Peened_Platform_Alloy',
+      color:0x7c8580,
+      metalness:0.82,
+      roughness:0.52,
+      transparent:true,
+      opacity:1
+    });
+    const rootMaterial=new THREE.MeshStandardMaterial({
+      name:'Root_Dovetail_Alloy',
+      color:0x676f6b,
+      metalness:0.78,
+      roughness:0.58,
+      transparent:true,
+      opacity:1
+    });
+
+    const platformMesh=new THREE.Mesh(new THREE.BoxGeometry(2.05,0.22,1.04,1,1,1),platformMaterial);
+    platformMesh.name='Blade_Platform';
+    platformMesh.position.set(0,-0.11,0);
+    hptDetail.add(platformMesh);
+
+    const rootNeck=new THREE.Mesh(new THREE.BoxGeometry(1.06,0.24,0.72,1,1,1),rootMaterial);
+    rootNeck.name='Root_Neck';
+    rootNeck.position.set(0,-0.34,0);
+    hptDetail.add(rootNeck);
+
+    const firTreeRoot=new THREE.Mesh(createFirTreeRootGeometry(),rootMaterial);
+    firTreeRoot.name='Simplified_Fir_Tree_Root';
+    hptDetail.add(firTreeRoot);
+
+    const coolingGroup=createCoolingSystem();
+    coolingGroup.name='Internal_Cooling_Channels';
+    coolingGroup.visible=false;
+    hptDetail.add(coolingGroup);
+
+    detailModels.set('hpt',{
+      id:'hpt',
+      group:hptDetail,
+      bladeGeometry,
+      bladeMaterial,
+      hardwareMaterials:[platformMaterial,rootMaterial],
+      coolingGroup,
+      supportsCooling:true,
+      target:new THREE.Vector3(0,1.02,0),
+      radius:6.15,
+      theta:0.74,
+      phi:1.12,
+      title:'High-Pressure Turbine Blade',
+      lines:[
+        'A twisted HPT airfoil with <strong>platform</strong> and simplified <strong>fir-tree root</strong>.',
+        'Internal serpentine cooling uses three passes with U-turns from root to tip.',
+        '<span class="thermal">Thermal mode</span> emphasizes hotter leading-edge and tip regions while channels remain cool.'
+      ]
+    });
+
+    const shroudedDetail=createShroudedBladeDetail();
+    shroudedDetail.group.visible=false;
+    detailModels.set('shrouded',shroudedDetail);
+    assembly.add(shroudedDetail.group);
+
+    const floorGrid=createReferenceGrid();
+    floorGrid.name='Reference_Flow_Plane';
+    scene.add(floorGrid);
+
+    let activeModel=detailModels.get('hpt');
+
+    const state={
+      showCooling:false,
+      thermal:false,
+      autoRotate:true,
+      dragging:false,
+      radius:activeModel.radius,
+      targetRadius:activeModel.radius,
+      theta:activeModel.theta,
+      phi:activeModel.phi,
+      targetTheta:activeModel.theta,
+      targetPhi:activeModel.phi,
+      target:activeModel.target.clone(),
+      pointers:new Map(),
+      lastPinchDistance:0
+    };
+
+    const controlsElement=renderer.domElement;
+    setActiveDetail(detailSelect.value,true);
+    installOrbitControls();
+    installUi();
+    resize();
+    renderer.setAnimationLoop(animate);
+    window.addEventListener('resize',resize,{passive:true});
+    window.addEventListener('orientationchange',()=>setTimeout(resize,120));
+
+    function clamp(value,min,max){return Math.max(min,Math.min(max,value));}
     function mix(a,b,t){return a+(b-a)*t;}
     function smoothStep(t){return t*t*(3-2*t);}
+    function damp(current,target,lambda,dt){return current+(target-current)*(1-Math.exp(-lambda*dt));}
 
-    function normalize(v){
-      const m=Math.hypot(v[0],v[1],v[2])||1;
-      return[v[0]/m,v[1]/m,v[2]/m];
+    function rotate2D(x,z,angle){
+      const c=Math.cos(angle);
+      const s=Math.sin(angle);
+      return [x*c-z*s,x*s+z*c];
     }
 
-    const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
-    const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]];
-    const rotX=(p,a)=>{const c=Math.cos(a),s=Math.sin(a);return[p[0],c*p[1]-s*p[2],s*p[1]+c*p[2]]};
-    const rotY=(p,a)=>{const c=Math.cos(a),s=Math.sin(a);return[c*p[0]+s*p[2],p[1],-s*p[0]+c*p[2]]};
-    const rotate2D=(x,y,a)=>{const c=Math.cos(a),s=Math.sin(a);return[x*c-y*s,x*s+y*c]};
-
-    function airfoilPoint(t){
-      const x=t;
-      const thickness=0.14;
-      const yt=5*thickness*(0.2969*Math.sqrt(x)-0.1260*x-0.3516*x*x+0.2843*x*x*x-0.1015*x*x*x*x);
-      const yc=0.035*Math.sin(Math.PI*x);
-      return{x:x-0.42,yTop:yc+yt,yBot:yc-yt};
+    function sectionSpec(s){
+      const eased=smoothStep(s);
+      return {
+        y:platformTop+s*bladeHeight,
+        chord:mix(1.38,0.82,eased),
+        thickness:mix(1.72,1.02,eased),
+        twist:mix(-0.22,0.94,eased),
+        sweep:0.16*Math.sin(Math.PI*s)-0.07*s,
+        lean:mix(-0.05,0.18,eased)
+      };
     }
 
-    function bladeSection(s,count){
-      const points=[];
-      for(let i=0;i<count;i++){
-        const t=i/(count-1);
-        const p=airfoilPoint(t);
-        points.push([p.x,p.yTop]);
-      }
-      for(let i=count-2;i>0;i--){
-        const t=i/(count-1);
-        const p=airfoilPoint(t);
-        points.push([p.x,p.yBot]);
+    function airfoilProfile(perSide){
+      const top=[];
+      const bottom=[];
+      for(let i=0;i<perSide;i++){
+        const angle=Math.PI*i/(perSide-1);
+        const t=0.5*(1-Math.cos(angle));
+        const thickness=0.24;
+        const yt=5*thickness*(0.2969*Math.sqrt(t)-0.1260*t-0.3516*t*t+0.2843*t*t*t-0.1015*t*t*t*t);
+        const noseRadius=0.018*Math.exp(-34*t);
+        const trailingRelief=0.004*(1-smoothStep(t));
+        const halfThickness=yt+noseRadius+trailingRelief;
+        const camber=0.082*Math.sin(Math.PI*t)*(1-0.18*t)-0.014*t;
+        const x=t-0.44;
+        top.push({x,z:camber+halfThickness*1.08,t,side:1});
+        bottom.push({x,z:camber-halfThickness*0.98,t,side:-1});
       }
 
-      const ss=smoothStep(s);
-      const chord=mix(210,112,ss);
-      const thickScale=mix(1.2,0.62,ss);
-      const twist=mix(-0.16,1.08,ss);
-      const bow=22*Math.sin(Math.PI*s)-7*s*s;
-      const lean=mix(-14,26,ss);
-      const zPos=mix(-245,245,s);
+      const perimeter=top.slice();
+      for(let i=bottom.length-2;i>0;i--) perimeter.push(bottom[i]);
+      return perimeter;
+    }
 
-      return points.map(([x,y])=>{
-        const px=x*chord;
-        const py=y*chord*thickScale;
-        const [rx,ry]=rotate2D(px,py,twist);
-        return[rx+bow,ry+lean,zPos];
+    function bladeSurfacePoint(s,profilePoint){
+      const spec=sectionSpec(s);
+      const localX=profilePoint.x*spec.chord;
+      const localZ=profilePoint.z*spec.chord*spec.thickness;
+      const rotated=rotate2D(localX,localZ,spec.twist);
+      return new THREE.Vector3(rotated[0]+spec.sweep,spec.y,rotated[1]+spec.lean);
+    }
+
+    function bladeInteriorPoint(s,localX,localZ){
+      const spec=sectionSpec(s);
+      const rotated=rotate2D(localX*spec.chord,localZ*spec.chord*spec.thickness,spec.twist);
+      return new THREE.Vector3(rotated[0]+spec.sweep,spec.y,rotated[1]+spec.lean);
+    }
+
+    function createBladeGeometry(slices,perSide){
+      const profile=airfoilProfile(perSide);
+      const ringCount=profile.length;
+      const positions=[];
+      const indices=[];
+      const baseColors=[];
+      const thermalColors=[];
+
+      for(let slice=0;slice<=slices;slice++){
+        const s=slice/slices;
+        for(let pointIndex=0;pointIndex<ringCount;pointIndex++){
+          const profilePoint=profile[pointIndex];
+          const point=bladeSurfacePoint(s,profilePoint);
+          positions.push(point.x,point.y,point.z);
+          pushBaseColor(baseColors,s,profilePoint);
+          pushThermalColor(thermalColors,s,profilePoint);
+        }
+      }
+
+      const vertexIndex=(slice,point)=>slice*ringCount+point;
+      for(let slice=0;slice<slices;slice++){
+        for(let point=0;point<ringCount;point++){
+          const next=(point+1)%ringCount;
+          indices.push(
+            vertexIndex(slice,point),
+            vertexIndex(slice+1,next),
+            vertexIndex(slice+1,point),
+            vertexIndex(slice,point),
+            vertexIndex(slice,next),
+            vertexIndex(slice+1,next)
+          );
+        }
+      }
+
+      const rootCenterIndex=positions.length/3;
+      const tipCenterIndex=rootCenterIndex+1;
+      const rootCenter=bladeInteriorPoint(0,0,0);
+      const tipCenter=bladeInteriorPoint(1,0,0);
+      positions.push(rootCenter.x,rootCenter.y,rootCenter.z,tipCenter.x,tipCenter.y,tipCenter.z);
+      pushBaseColor(baseColors,0,{t:0.5,side:0});
+      pushBaseColor(baseColors,1,{t:0.5,side:0});
+      pushThermalColor(thermalColors,0,{t:0.5,side:0});
+      pushThermalColor(thermalColors,1,{t:0.5,side:0});
+
+      for(let point=0;point<ringCount;point++){
+        const next=(point+1)%ringCount;
+        indices.push(rootCenterIndex,vertexIndex(0,next),vertexIndex(0,point));
+        indices.push(tipCenterIndex,vertexIndex(slices,point),vertexIndex(slices,next));
+      }
+
+      const geometry=new THREE.BufferGeometry();
+      geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+      geometry.setAttribute('color',new THREE.Float32BufferAttribute(baseColors,3));
+      geometry.setIndex(indices);
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+      geometry.userData.baseColors=new Float32Array(baseColors);
+      geometry.userData.thermalColors=new Float32Array(thermalColors);
+      geometry.userData.triangleCount=indices.length/3;
+      return geometry;
+    }
+
+    function pushBaseColor(colors,s,profilePoint){
+      const span=0.74+0.15*s;
+      const leading=1-clamp(profilePoint.t*1.8,0,1);
+      const sideShade=profilePoint.side > 0 ? 0.05 : -0.03;
+      const tone=clamp(span+leading*0.06+sideShade,0,1);
+      const r=mix(0.42,0.70,tone);
+      const g=mix(0.48,0.76,tone);
+      const b=mix(0.49,0.74,tone);
+      colors.push(r,g,b);
+    }
+
+    function pushThermalColor(colors,s,profilePoint){
+      const leading=1-clamp(profilePoint.t*2.15,0,1);
+      const tip=Math.pow(s,1.35);
+      const pressureSide=profilePoint.side < 0 ? 0.05 : 0;
+      const heat=clamp(0.24+0.44*tip+0.28*leading+pressureSide,0,1);
+      if(heat<0.5){
+        const t=heat/0.5;
+        colors.push(mix(0.26,0.95,t),mix(0.28,0.50,t),mix(0.25,0.10,t));
+      }else{
+        const t=(heat-0.5)/0.5;
+        colors.push(1,mix(0.50,0.12,t),mix(0.10,0.04,t));
+      }
+    }
+
+    function createFirTreeRootGeometry(){
+      const depth=0.58;
+      const points=[
+        [-0.32,-1.28],[-0.48,-1.10],[-0.34,-0.96],[-0.56,-0.80],
+        [-0.39,-0.64],[-0.62,-0.47],[-0.44,-0.28],[0.44,-0.28],
+        [0.62,-0.47],[0.39,-0.64],[0.56,-0.80],[0.34,-0.96],
+        [0.48,-1.10],[0.32,-1.28]
+      ];
+      const shape=new THREE.Shape();
+      shape.moveTo(points[0][0],points[0][1]);
+      for(let i=1;i<points.length;i++) shape.lineTo(points[i][0],points[i][1]);
+      shape.closePath();
+
+      const geometry=new THREE.ExtrudeGeometry(shape,{
+        depth,
+        bevelEnabled:false,
+        curveSegments:1
+      });
+      geometry.translate(0,0,-depth/2);
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function createCoolingSystem(){
+      const group=new THREE.Group();
+      const channelMaterial=new THREE.MeshStandardMaterial({
+        name:'Blue_Anodized_Cooling_Air',
+        color:0x54d6ff,
+        emissive:0x0f6ca0,
+        emissiveIntensity:0.65,
+        metalness:0.05,
+        roughness:0.26,
+        transparent:true,
+        opacity:0,
+        depthWrite:false
+      });
+      group.userData.material=channelMaterial;
+
+      const serpentinePoints=[
+        new THREE.Vector3(-0.22,-1.05,0.00),
+        new THREE.Vector3(-0.25,-0.55,0.02),
+        bladeInteriorPoint(0.04,-0.24,0.01),
+        bladeInteriorPoint(0.32,-0.23,0.01),
+        bladeInteriorPoint(0.67,-0.20,0.00),
+        bladeInteriorPoint(0.96,-0.16,0.00),
+        bladeInteriorPoint(0.99,-0.03,0.02),
+        bladeInteriorPoint(0.96,0.09,0.00),
+        bladeInteriorPoint(0.62,0.08,-0.01),
+        bladeInteriorPoint(0.24,0.07,-0.01),
+        bladeInteriorPoint(0.04,0.08,0.00),
+        bladeInteriorPoint(0.02,0.19,0.02),
+        bladeInteriorPoint(0.05,0.28,0.00),
+        bladeInteriorPoint(0.34,0.27,-0.01),
+        bladeInteriorPoint(0.68,0.23,-0.01),
+        bladeInteriorPoint(0.96,0.19,0.00)
+      ];
+
+      const serpentineCurve=new THREE.CatmullRomCurve3(serpentinePoints,false,'centripetal',0.35);
+      const serpentineGeometry=new THREE.TubeGeometry(serpentineCurve,compactMode ? 88 : 132,0.027,compactMode ? 7 : 8,false);
+      const serpentineMesh=new THREE.Mesh(serpentineGeometry,channelMaterial);
+      serpentineMesh.name='Cooling_Channel_Serpentine_Three_Pass';
+      group.add(serpentineMesh);
+
+      const inletCurve=new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-0.22,-1.26,0.00),
+        new THREE.Vector3(-0.38,-1.10,0.08),
+        new THREE.Vector3(-0.31,-0.92,-0.07),
+        new THREE.Vector3(-0.22,-1.05,0.00)
+      ],false,'centripetal',0.45);
+      const inletMesh=new THREE.Mesh(new THREE.TubeGeometry(inletCurve,34,0.025,7,false),channelMaterial);
+      inletMesh.name='Cooling_Channel_Root_Pigtail_Inlet';
+      group.add(inletMesh);
+
+      const tipFilmHoles=createCoolingHoleMarkers(channelMaterial);
+      tipFilmHoles.name='Tip_Film_Cooling_Outlet_Markers';
+      group.add(tipFilmHoles);
+      return group;
+    }
+
+    function createCoolingHoleMarkers(material){
+      const group=new THREE.Group();
+      const geometry=new THREE.SphereGeometry(0.032,compactMode ? 8 : 10,compactMode ? 6 : 8);
+      const positions=[
+        [0.92,-0.13,0.012],
+        [0.94,-0.02,0.012],
+        [0.91,0.10,0.012],
+        [0.88,0.20,0.012]
+      ];
+      for(let i=0;i<positions.length;i++){
+        const point=bladeInteriorPoint(positions[i][0],positions[i][1],positions[i][2]);
+        const marker=new THREE.Mesh(geometry,material);
+        marker.name=`Film_Cooling_Outlet_${String(i+1).padStart(2,'0')}`;
+        marker.position.copy(point);
+        group.add(marker);
+      }
+      return group;
+    }
+
+    function createShroudedBladeDetail(){
+      const group=new THREE.Group();
+      group.name='Long_Shrouded_Blade_Detail';
+
+      const geometry=createShroudedBladeGeometry(compactMode ? 38 : 52,compactMode ? 22 : 30);
+      const bladeMaterial=new THREE.MeshStandardMaterial({
+        name:'Brushed_Alloy_Long_Blade_Vertex_Gradient',
+        color:0xffffff,
+        vertexColors:true,
+        metalness:0.72,
+        roughness:0.46,
+        transparent:true,
+        opacity:1,
+        depthWrite:true
+      });
+      const hardwareMaterial=new THREE.MeshStandardMaterial({
+        name:'Machined_Root_Block_Alloy',
+        color:0xb0b7ad,
+        metalness:0.68,
+        roughness:0.55,
+        transparent:true,
+        opacity:1
+      });
+      const shadowMaterial=new THREE.MeshStandardMaterial({
+        name:'Root_Recess_Shadow',
+        color:0x151816,
+        metalness:0.18,
+        roughness:0.86,
+        transparent:true,
+        opacity:1
+      });
+
+      const blade=new THREE.Mesh(geometry,bladeMaterial);
+      blade.name='Photo_Reference_Long_Blade_Airfoil';
+      group.add(blade);
+
+      const platform=new THREE.Mesh(new THREE.BoxGeometry(1.68,0.24,0.92,1,1,1),hardwareMaterial);
+      platform.name='Long_Blade_Platform';
+      platform.position.set(0,-0.10,0);
+      group.add(platform);
+
+      const rootBlock=new THREE.Mesh(new THREE.BoxGeometry(1.24,0.44,0.70,1,1,1),hardwareMaterial);
+      rootBlock.name='Long_Blade_Root_Block';
+      rootBlock.position.set(0,-0.43,0);
+      group.add(rootBlock);
+
+      const retentionPocket=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.22,0.022,1,1,1),shadowMaterial);
+      retentionPocket.name='Root_Retention_Pocket';
+      retentionPocket.position.set(-0.18,-0.36,0.362);
+      group.add(retentionPocket);
+
+      const rootTab=new THREE.Mesh(createShroudedRootGeometry(),hardwareMaterial);
+      rootTab.name='Long_Blade_Dovetail_Tab';
+      rootTab.position.y=-0.41;
+      group.add(rootTab);
+
+      const tipSpec=shroudedSectionSpec(1);
+      const tipShroud=new THREE.Mesh(new THREE.BoxGeometry(1.36,0.16,0.62,1,1,1),hardwareMaterial);
+      tipShroud.name='Tip_Shroud_Land';
+      tipShroud.position.set(tipSpec.sweep,tipSpec.y+0.08,tipSpec.lean);
+      tipShroud.rotation.y=tipSpec.twist;
+      group.add(tipShroud);
+
+      const tipKnifeSeal=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.42,0.56,1,1,1),hardwareMaterial);
+      tipKnifeSeal.name='Raised_Tip_Seal_Rib';
+      tipKnifeSeal.position.set(tipSpec.sweep+0.54,tipSpec.y+0.24,tipSpec.lean);
+      tipKnifeSeal.rotation.y=tipSpec.twist+0.12;
+      group.add(tipKnifeSeal);
+
+      return {
+        id:'shrouded',
+        group,
+        bladeGeometry:geometry,
+        bladeMaterial,
+        hardwareMaterials:[hardwareMaterial,shadowMaterial],
+        coolingGroup:null,
+        supportsCooling:false,
+        target:new THREE.Vector3(0,1.28,0),
+        radius:6.75,
+        theta:0.96,
+        phi:1.18,
+        title:'Long Shrouded Blade',
+        lines:[
+          'A long, lightly twisted blade inspired by the reference part, with a broad machined platform.',
+          'The simplified root block includes a retention pocket, dovetail tab, and raised tip shroud land.',
+          '<span class="thermal">Thermal mode</span> shows a plausible hotter leading edge and tip region for inspection.'
+        ]
+      };
+    }
+
+    function shroudedSectionSpec(s){
+      const eased=smoothStep(s);
+      return {
+        y:platformTop+s*shroudedBladeHeight,
+        chord:mix(1.62,1.16,eased),
+        thickness:mix(0.96,0.68,eased),
+        twist:mix(0.06,-0.36,eased),
+        sweep:-0.10*s+0.10*Math.sin(Math.PI*s),
+        lean:mix(0.02,-0.08,eased)
+      };
+    }
+
+    function shroudedAirfoilProfile(perSide){
+      const top=[];
+      const bottom=[];
+      for(let i=0;i<perSide;i++){
+        const angle=Math.PI*i/(perSide-1);
+        const t=0.5*(1-Math.cos(angle));
+        const thickness=0.16;
+        const yt=5*thickness*(0.2969*Math.sqrt(t)-0.1260*t-0.3516*t*t+0.2843*t*t*t-0.1015*t*t*t*t);
+        const camber=0.052*Math.sin(Math.PI*t)*(1-0.12*t)-0.006*t;
+        const rootRound=0.010*Math.exp(-28*t);
+        const x=t-0.46;
+        top.push({x,z:camber+(yt+rootRound)*1.03,t,side:1});
+        bottom.push({x,z:camber-(yt+rootRound)*0.92,t,side:-1});
+      }
+
+      const perimeter=top.slice();
+      for(let i=bottom.length-2;i>0;i--) perimeter.push(bottom[i]);
+      return perimeter;
+    }
+
+    function shroudedBladeSurfacePoint(s,profilePoint){
+      const spec=shroudedSectionSpec(s);
+      const localX=profilePoint.x*spec.chord;
+      const localZ=profilePoint.z*spec.chord*spec.thickness;
+      const rotated=rotate2D(localX,localZ,spec.twist);
+      return new THREE.Vector3(rotated[0]+spec.sweep,spec.y,rotated[1]+spec.lean);
+    }
+
+    function shroudedBladeInteriorPoint(s,localX,localZ){
+      const spec=shroudedSectionSpec(s);
+      const rotated=rotate2D(localX*spec.chord,localZ*spec.chord*spec.thickness,spec.twist);
+      return new THREE.Vector3(rotated[0]+spec.sweep,spec.y,rotated[1]+spec.lean);
+    }
+
+    function createShroudedBladeGeometry(slices,perSide){
+      const profile=shroudedAirfoilProfile(perSide);
+      const ringCount=profile.length;
+      const positions=[];
+      const indices=[];
+      const baseColors=[];
+      const thermalColors=[];
+
+      for(let slice=0;slice<=slices;slice++){
+        const s=slice/slices;
+        for(let pointIndex=0;pointIndex<ringCount;pointIndex++){
+          const profilePoint=profile[pointIndex];
+          const point=shroudedBladeSurfacePoint(s,profilePoint);
+          positions.push(point.x,point.y,point.z);
+          pushShroudedBaseColor(baseColors,s,profilePoint);
+          pushShroudedThermalColor(thermalColors,s,profilePoint);
+        }
+      }
+
+      const vertexIndex=(slice,point)=>slice*ringCount+point;
+      for(let slice=0;slice<slices;slice++){
+        for(let point=0;point<ringCount;point++){
+          const next=(point+1)%ringCount;
+          indices.push(
+            vertexIndex(slice,point),
+            vertexIndex(slice+1,next),
+            vertexIndex(slice+1,point),
+            vertexIndex(slice,point),
+            vertexIndex(slice,next),
+            vertexIndex(slice+1,next)
+          );
+        }
+      }
+
+      const rootCenterIndex=positions.length/3;
+      const tipCenterIndex=rootCenterIndex+1;
+      const rootCenter=shroudedBladeInteriorPoint(0,0,0);
+      const tipCenter=shroudedBladeInteriorPoint(1,0,0);
+      positions.push(rootCenter.x,rootCenter.y,rootCenter.z,tipCenter.x,tipCenter.y,tipCenter.z);
+      pushShroudedBaseColor(baseColors,0,{t:0.5,side:0});
+      pushShroudedBaseColor(baseColors,1,{t:0.5,side:0});
+      pushShroudedThermalColor(thermalColors,0,{t:0.5,side:0});
+      pushShroudedThermalColor(thermalColors,1,{t:0.5,side:0});
+
+      for(let point=0;point<ringCount;point++){
+        const next=(point+1)%ringCount;
+        indices.push(rootCenterIndex,vertexIndex(0,next),vertexIndex(0,point));
+        indices.push(tipCenterIndex,vertexIndex(slices,point),vertexIndex(slices,next));
+      }
+
+      const geometry=new THREE.BufferGeometry();
+      geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+      geometry.setAttribute('color',new THREE.Float32BufferAttribute(baseColors,3));
+      geometry.setIndex(indices);
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+      geometry.userData.baseColors=new Float32Array(baseColors);
+      geometry.userData.thermalColors=new Float32Array(thermalColors);
+      geometry.userData.triangleCount=indices.length/3;
+      return geometry;
+    }
+
+    function pushShroudedBaseColor(colors,s,profilePoint){
+      const span=0.70+0.12*s;
+      const leading=1-clamp(profilePoint.t*1.6,0,1);
+      const tone=clamp(span+leading*0.05+(profilePoint.side>0 ? 0.03 : -0.02),0,1);
+      colors.push(mix(0.62,0.86,tone),mix(0.64,0.86,tone),mix(0.58,0.78,tone));
+    }
+
+    function pushShroudedThermalColor(colors,s,profilePoint){
+      const leading=1-clamp(profilePoint.t*2,0,1);
+      const heat=clamp(0.18+0.36*s+0.22*leading,0,1);
+      colors.push(mix(0.50,1,heat),mix(0.56,0.34,heat),mix(0.50,0.06,heat));
+    }
+
+    function createShroudedRootGeometry(){
+      const depth=0.68;
+      const points=[
+        [-0.40,-0.30],[-0.58,-0.58],[-0.42,-0.76],[-0.52,-0.98],
+        [0.52,-0.98],[0.42,-0.76],[0.58,-0.58],[0.40,-0.30]
+      ];
+      const shape=new THREE.Shape();
+      shape.moveTo(points[0][0],points[0][1]);
+      for(let i=1;i<points.length;i++) shape.lineTo(points[i][0],points[i][1]);
+      shape.closePath();
+
+      const geometry=new THREE.ExtrudeGeometry(shape,{
+        depth,
+        bevelEnabled:false,
+        curveSegments:1
+      });
+      geometry.translate(0,0,-depth/2);
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function createReferenceGrid(){
+      const grid=new THREE.GridHelper(4.8,16,0x52615b,0x29302d);
+      grid.position.y=-1.31;
+      grid.material.transparent=true;
+      grid.material.opacity=0.22;
+      return grid;
+    }
+
+    function installUi(){
+      detailSelect.addEventListener('change',()=>{
+        setActiveDetail(detailSelect.value,false);
+      });
+
+      coolingBtn.addEventListener('click',()=>{
+        if(!activeModel.supportsCooling) return;
+        state.showCooling=!state.showCooling;
+        coolingBtn.setAttribute('aria-pressed',String(state.showCooling));
+        coolingBtn.textContent=state.showCooling ? 'Hide internal cooling' : 'Show internal cooling';
+        activeModel.coolingGroup.visible=true;
+      });
+
+      thermalBtn.addEventListener('click',()=>{
+        state.thermal=!state.thermal;
+        thermalBtn.setAttribute('aria-pressed',String(state.thermal));
+      });
+
+      rotateBtn.addEventListener('click',()=>{
+        state.autoRotate=!state.autoRotate;
+        rotateBtn.setAttribute('aria-pressed',String(state.autoRotate));
+        rotateBtn.textContent=`Rotation: ${state.autoRotate ? 'On' : 'Off'}`;
+      });
+
+      resetBtn.addEventListener('click',()=>{
+        state.target.copy(activeModel.target);
+        state.targetRadius=activeModel.radius;
+        state.targetTheta=activeModel.theta;
+        state.targetPhi=activeModel.phi;
+        state.autoRotate=true;
+        rotateBtn.setAttribute('aria-pressed','true');
+        rotateBtn.textContent='Rotation: On';
       });
     }
 
-    function buildBladeGeometry(slices,perSide){
-      const rings=[];
-      for(let s=0;s<=slices;s++) rings.push(bladeSection(s/slices,perSide));
+    function setActiveDetail(id,immediate){
+      const nextModel=detailModels.get(id) || detailModels.get('hpt');
+      activeModel=nextModel;
+      detailSelect.value=activeModel.id;
 
-      const verts=[];
-      for(let i=0;i<rings.length;i++){
-        for(let j=0;j<rings[i].length;j++){
-          verts.push(rings[i][j]);
+      detailModels.forEach((model)=>{
+        model.group.visible=model===activeModel;
+        if(model!==activeModel && model.coolingGroup) model.coolingGroup.visible=false;
+      });
+
+      if(!activeModel.supportsCooling) state.showCooling=false;
+      if(activeModel.coolingGroup) activeModel.coolingGroup.visible=state.showCooling;
+
+      coolingBtn.disabled=!activeModel.supportsCooling;
+      coolingBtn.setAttribute('aria-pressed',String(state.showCooling && activeModel.supportsCooling));
+      coolingBtn.textContent=activeModel.supportsCooling
+        ? (state.showCooling ? 'Hide internal cooling' : 'Show internal cooling')
+        : 'Cooling unavailable';
+
+      detailTitle.textContent=activeModel.title;
+      detailLineA.innerHTML=activeModel.lines[0];
+      detailLineB.innerHTML=activeModel.lines[1];
+      detailLineC.innerHTML=activeModel.lines[2];
+
+      state.target.copy(activeModel.target);
+      state.targetRadius=activeModel.radius;
+      state.targetTheta=activeModel.theta;
+      state.targetPhi=activeModel.phi;
+
+      if(immediate){
+        state.radius=activeModel.radius;
+        state.theta=activeModel.theta;
+        state.phi=activeModel.phi;
+      }
+    }
+
+    function installOrbitControls(){
+      controlsElement.addEventListener('pointerdown',(event)=>{
+        controlsElement.classList.add('dragging');
+        if(controlsElement.setPointerCapture){
+          try{controlsElement.setPointerCapture(event.pointerId);}catch(error){/* Pointer capture is best-effort on older Safari. */}
         }
-      }
+        state.dragging=true;
+        state.autoRotate=false;
+        rotateBtn.setAttribute('aria-pressed','false');
+        rotateBtn.textContent='Rotation: Off';
+        state.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+        if(state.pointers.size===2) state.lastPinchDistance=getPinchDistance();
+      });
 
-      const ringCount=rings[0].length;
-      const idx=(si,pi)=>si*ringCount+pi;
-      const faces=[];
+      controlsElement.addEventListener('pointermove',(event)=>{
+        if(!state.pointers.has(event.pointerId)) return;
+        const previous=state.pointers.get(event.pointerId);
+        const dx=event.clientX-previous.x;
+        const dy=event.clientY-previous.y;
+        state.pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
 
-      for(let s=0;s<slices;s++){
-        for(let p=0;p<ringCount;p++){
-          const p2=(p+1)%ringCount;
-          const a=idx(s,p);
-          const b=idx(s+1,p);
-          const c=idx(s+1,p2);
-          const d=idx(s,p2);
-          faces.push([a,b,c],[a,c,d]);
+        if(state.pointers.size===1){
+          state.targetTheta-=dx*0.0062;
+          state.targetPhi=clamp(state.targetPhi-dy*0.0054,0.34,Math.PI-0.34);
+          return;
         }
-      }
 
-      const rootCenter=verts.length;
-      const tipCenter=verts.length+1;
-      verts.push([0,0,rings[0][0][2]],[0,0,rings[rings.length-1][0][2]]);
-
-      for(let p=0;p<ringCount;p++){
-        const p2=(p+1)%ringCount;
-        faces.push([rootCenter,idx(0,p2),idx(0,p)]);
-        faces.push([tipCenter,idx(slices,p),idx(slices,p2)]);
-      }
-
-      return{verts,faces};
-    }
-
-    function resizeCanvas(){
-      const rect=canvas.getBoundingClientRect();
-      const dpr=Math.min(3,window.devicePixelRatio||1);
-      const width=Math.max(1,Math.round(rect.width*dpr));
-      const height=Math.max(1,Math.round(rect.height*dpr));
-      if(canvas.width!==width || canvas.height!==height){
-        canvas.width=width;
-        canvas.height=height;
-        needsRender=true;
-      }
-    }
-
-    function projectPoint(p,width,height){
-      const z=p[2]+CAMERA_Z;
-      if(z<=1) return null;
-      const inv=FOCAL/z;
-      const cx=width*0.45;
-      const cy=height*0.54;
-      return[cx+p[0]*inv,cy-p[1]*inv,z];
-    }
-
-    function render(){
-      const width=canvas.width;
-      const height=canvas.height;
-      if(width<2 || height<2) return;
-
-      ctx.clearRect(0,0,width,height);
-
-      const transformed=geometry.verts.map(p=>rotY(rotX(p,state.rotX),state.rotY));
-      const projected=transformed.map(p=>projectPoint(p,width,height));
-      const records=[];
-
-      for(let i=0;i<geometry.faces.length;i++){
-        const f=geometry.faces[i];
-        const pa=projected[f[0]];
-        const pb=projected[f[1]];
-        const pc=projected[f[2]];
-        if(!pa || !pb || !pc) continue;
-
-        const a=transformed[f[0]],b=transformed[f[1]],c=transformed[f[2]];
-        const n=normalize(cross(sub(b,a),sub(c,a)));
-        const light=clamp(ambient+diffuse*Math.max(0,n[0]*lightDir[0]+n[1]*lightDir[1]+n[2]*lightDir[2]),0,1);
-        const shade=[Math.round(baseColor[0]*light),Math.round(baseColor[1]*light),Math.round(baseColor[2]*light)];
-
-        records.push({
-          depth:(pa[2]+pb[2]+pc[2])/3,
-          points:[pa,pb,pc],
-          fill:`rgb(${shade[0]}, ${shade[1]}, ${shade[2]})`
-        });
-      }
-
-      records.sort((a,b)=>b.depth-a.depth);
-
-      if(state.wire){
-        ctx.lineWidth=Math.max(1,canvas.width/1600);
-        ctx.strokeStyle='rgba(220,232,255,.48)';
-      }
-
-      for(let i=0;i<records.length;i++){
-        const face=records[i];
-        ctx.beginPath();
-        ctx.moveTo(face.points[0][0],face.points[0][1]);
-        ctx.lineTo(face.points[1][0],face.points[1][1]);
-        ctx.lineTo(face.points[2][0],face.points[2][1]);
-        ctx.closePath();
-
-        ctx.fillStyle=face.fill;
-        ctx.fill();
-
-        if(state.wire){
-          ctx.stroke();
-        }else if(!compactMode){
-          ctx.strokeStyle='rgba(18,24,36,.16)';
-          ctx.lineWidth=Math.max(0.6,canvas.width/3600);
-          ctx.stroke();
+        const distance=getPinchDistance();
+        if(state.lastPinchDistance>0 && distance>1){
+          state.targetRadius=clamp(state.targetRadius*(state.lastPinchDistance/distance),3.35,8.8);
         }
+        state.lastPinchDistance=distance;
+      });
+
+      const endPointer=(event)=>{
+        state.pointers.delete(event.pointerId);
+        if(state.pointers.size===0){
+          state.dragging=false;
+          state.lastPinchDistance=0;
+          controlsElement.classList.remove('dragging');
+        }else if(state.pointers.size===2){
+          state.lastPinchDistance=getPinchDistance();
+        }
+      };
+
+      controlsElement.addEventListener('pointerup',endPointer);
+      controlsElement.addEventListener('pointercancel',endPointer);
+      controlsElement.addEventListener('lostpointercapture',endPointer);
+
+      controlsElement.addEventListener('wheel',(event)=>{
+        event.preventDefault();
+        state.targetRadius=clamp(state.targetRadius+event.deltaY*0.004,3.35,8.8);
+      },{passive:false});
+    }
+
+    function getPinchDistance(){
+      const values=Array.from(state.pointers.values());
+      if(values.length<2) return 0;
+      const dx=values[0].x-values[1].x;
+      const dy=values[0].y-values[1].y;
+      return Math.hypot(dx,dy);
+    }
+
+    function updateCamera(dt){
+      if(state.autoRotate && !state.dragging) state.targetTheta+=dt*0.32;
+      state.theta=damp(state.theta,state.targetTheta,14,dt);
+      state.phi=damp(state.phi,state.targetPhi,14,dt);
+      state.radius=damp(state.radius,state.targetRadius,12,dt);
+
+      const sinPhi=Math.sin(state.phi);
+      camera.position.set(
+        state.target.x+state.radius*sinPhi*Math.sin(state.theta),
+        state.target.y+state.radius*Math.cos(state.phi),
+        state.target.z+state.radius*sinPhi*Math.cos(state.theta)
+      );
+      camera.lookAt(state.target);
+    }
+
+    function updateMaterials(dt){
+      const showCooling=state.showCooling && activeModel.supportsCooling;
+      const bladeOpacityTarget=showCooling ? 0.34 : 1;
+      const hardwareOpacityTarget=showCooling ? 0.58 : 1;
+      const channelOpacityTarget=showCooling ? 1 : 0;
+
+      activeModel.bladeMaterial.opacity=damp(activeModel.bladeMaterial.opacity,bladeOpacityTarget,7.5,dt);
+      activeModel.bladeMaterial.depthWrite=activeModel.bladeMaterial.opacity>0.82 && !showCooling;
+
+      activeModel.hardwareMaterials.forEach((material)=>{
+        material.opacity=damp(material.opacity,hardwareOpacityTarget,7.5,dt);
+        material.depthWrite=material.opacity>0.82 && !showCooling;
+      });
+
+      if(activeModel.coolingGroup){
+        const channelMaterial=activeModel.coolingGroup.userData.material;
+        channelMaterial.opacity=damp(channelMaterial.opacity,channelOpacityTarget,8.5,dt);
+        channelMaterial.emissiveIntensity=damp(channelMaterial.emissiveIntensity,state.thermal ? 1.25 : 0.65,6,dt);
+        if(channelMaterial.opacity<0.02 && !showCooling) activeModel.coolingGroup.visible=false;
       }
+
+      updateBladeColorRamp(dt,activeModel);
     }
 
-    function pointerDown(clientX,clientY){
-      state.drag=true;
-      state.lastX=clientX;
-      state.lastY=clientY;
-      state.lastT=performance.now();
-      state.idle=0;
-      canvas.classList.add('dragging');
+    function updateBladeColorRamp(dt,model){
+      const attribute=model.bladeGeometry.attributes.color;
+      const source=attribute.array;
+      const target=state.thermal ? model.bladeGeometry.userData.thermalColors : model.bladeGeometry.userData.baseColors;
+      const amount=1-Math.exp(-7*dt);
+      let changed=false;
+      for(let i=0;i<source.length;i++){
+        const next=source[i]+(target[i]-source[i])*amount;
+        if(Math.abs(next-source[i])>0.0005) changed=true;
+        source[i]=next;
+      }
+      if(changed) attribute.needsUpdate=true;
+
+      scratchColor.setHex(state.thermal ? 0xff7b36 : 0xffffff);
+      model.bladeMaterial.color.lerp(scratchColor,amount*0.35);
     }
 
-    function pointerMove(clientX,clientY){
-      if(!state.drag) return;
-      const now=performance.now();
-      const dx=clientX-state.lastX;
-      const dy=clientY-state.lastY;
-      const dt=Math.max(8,now-state.lastT);
-      const k=0.0066;
-
-      state.rotY+=dx*k;
-      state.rotX=clamp(state.rotX+dy*k,-1.55,1.55);
-      state.velY=dx/dt*0.09;
-      state.velX=dy/dt*0.09;
-      state.lastX=clientX;
-      state.lastY=clientY;
-      state.lastT=now;
-      needsRender=true;
-    }
-
-    function pointerUp(){
-      state.drag=false;
-      canvas.classList.remove('dragging');
+    function resize(){
+      const width=Math.max(1,canvas.clientWidth);
+      const height=Math.max(1,canvas.clientHeight);
+      renderer.setSize(width,height,false);
+      camera.aspect=width/height;
+      camera.updateProjectionMatrix();
     }
 
     function animate(){
-      if(!state.drag){
-        const moving=Math.abs(state.velX)+Math.abs(state.velY);
-        if(moving>0.00002){
-          state.rotY+=state.velY;
-          state.rotX=clamp(state.rotX+state.velX,-1.55,1.55);
-          state.velX*=0.94;
-          state.velY*=0.94;
-          state.idle=0;
-          needsRender=true;
-        }else if(!compactMode){
-          state.idle+=1;
-          if(state.idle>110){
-            state.rotY+=0.0022;
-            needsRender=true;
-          }
-        }
-      }
-
-      if(needsRender){
-        render();
-        needsRender=false;
-      }
-
-      requestAnimationFrame(animate);
+      const dt=Math.min(clock.getDelta(),0.05);
+      updateCamera(dt);
+      updateMaterials(dt);
+      renderer.render(scene,camera);
     }
-
-    function installInputHandlers(){
-      if('PointerEvent' in window){
-        canvas.addEventListener('pointerdown',(e)=>{
-          if(canvas.setPointerCapture){
-            try{canvas.setPointerCapture(e.pointerId);}catch(_){/* noop */}
-          }
-          pointerDown(e.clientX,e.clientY);
-          needsRender=true;
-        });
-        canvas.addEventListener('pointermove',(e)=>pointerMove(e.clientX,e.clientY));
-        canvas.addEventListener('pointerup',pointerUp);
-        canvas.addEventListener('pointercancel',pointerUp);
-        canvas.addEventListener('lostpointercapture',pointerUp);
-        return;
-      }
-
-      canvas.addEventListener('mousedown',(e)=>{pointerDown(e.clientX,e.clientY);needsRender=true;});
-      window.addEventListener('mousemove',(e)=>pointerMove(e.clientX,e.clientY));
-      window.addEventListener('mouseup',pointerUp);
-
-      canvas.addEventListener('touchstart',(e)=>{
-        const t=e.changedTouches[0];
-        if(!t) return;
-        e.preventDefault();
-        pointerDown(t.clientX,t.clientY);
-        needsRender=true;
-      },{passive:false});
-
-      canvas.addEventListener('touchmove',(e)=>{
-        const t=e.changedTouches[0];
-        if(!t) return;
-        e.preventDefault();
-        pointerMove(t.clientX,t.clientY);
-      },{passive:false});
-
-      canvas.addEventListener('touchend',pointerUp);
-      canvas.addEventListener('touchcancel',pointerUp);
-    }
-
-    resetBtn.addEventListener('click',()=>{
-      state.rotX=-0.36;
-      state.rotY=0.92;
-      state.velX=0;
-      state.velY=0;
-      state.idle=0;
-      needsRender=true;
-    });
-
-    wireBtn.addEventListener('click',()=>{
-      state.wire=!state.wire;
-      wireBtn.textContent=`Wireframe: ${state.wire?'On':'Off'}`;
-      needsRender=true;
-    });
-
-    installInputHandlers();
-    resizeCanvas();
-    animate();
-
-    window.addEventListener('resize',resizeCanvas,{passive:true});
-    window.addEventListener('orientationchange',()=>{setTimeout(resizeCanvas,120);});
-
-    setTimeout(()=>{needsRender=true;},120);
-    setTimeout(()=>{needsRender=true;},420);
-  })();
   </script>
 </body>
 </html>
