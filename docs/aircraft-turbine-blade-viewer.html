@@ -64,9 +64,9 @@
     const state={rotX:-0.36,rotY:0.92,velX:0,velY:0,drag:false,lastX:0,lastY:0,lastT:0,wire:false,idle:0};
     let needsRender=true;
 
-    const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-    const mix=(a,b,t)=>a+(b-a)*t;
-    const smoothStep=t=>t*t*(3-2*t);
+    function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+    function mix(a,b,t){return a+(b-a)*t;}
+    function smoothStep(t){return t*t*(3-2*t);}
 
     function normalize(v){
       const m=Math.hypot(v[0],v[1],v[2])||1;
